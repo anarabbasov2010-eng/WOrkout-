@@ -55,4 +55,7 @@
     <string name="anatomy_motion_title">Movimiento suave</string>
     <string name="anatomy_motion_subtitle">Animación lenta similar a la respiración</string>
     <string name="anatomy_disclaimer">Modelo didáctico estilizado, no un atlas médico. Los músculos resaltados son ilustrativos y no constituyen asesoramiento médico.</string>
+    <string name="anatomy_all_groups">Todos los grupos</string>
+    <string name="anatomy_desc_all">Se muestra toda la capa seleccionada. Elige un grupo para aislar sus estructuras musculares.</string>
+    <string name="anatomy_asset_credit">Modelo anatómico Écorché · CC BY-SA 4.0. Basado en BodyParts3D y Z-Anatomy.</string>
 </resources>

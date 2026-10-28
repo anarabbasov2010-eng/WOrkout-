@@ -55,4 +55,7 @@
     <string name="anatomy_motion_title">Yumşaq hərəkət</string>
     <string name="anatomy_motion_subtitle">Yavaş, nəfəsə bənzər animasiya</string>
     <string name="anatomy_disclaimer">Stilizə edilmiş öyrədici modeldir, tibbi atlas deyil. Əzələ vurğuları şərtidir və tibbi məsləhət sayılmır.</string>
+    <string name="anatomy_all_groups">Bütün qruplar</string>
+    <string name="anatomy_desc_all">Seçilmiş qatın hamısı göstərilir. Ayrı əzələ strukturlarını görmək üçün qrup seç.</string>
+    <string name="anatomy_asset_credit">Écorché anatomiya modeli · CC BY-SA 4.0. BodyParts3D və Z-Anatomy əsasında.</string>
 </resources>

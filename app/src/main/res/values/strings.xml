@@ -94,4 +94,7 @@
     <string name="anatomy_motion_title">Subtle idle motion</string>
     <string name="anatomy_motion_subtitle">Slower breathing-like movement</string>
     <string name="anatomy_disclaimer">Stylized learning model — not a medical atlas. Muscle highlights are illustrative, not individualized training or medical advice.</string>
+    <string name="anatomy_all_groups">All groups</string>
+    <string name="anatomy_desc_all">Showing the complete selected layer. Choose a group to isolate its named muscle structures.</string>
+    <string name="anatomy_asset_credit">Écorché anatomical model · CC BY-SA 4.0. Based on BodyParts3D and Z-Anatomy.</string>
 </resources>

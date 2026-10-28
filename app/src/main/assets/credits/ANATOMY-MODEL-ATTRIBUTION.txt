@@ -1,0 +1,11 @@
+Écorché 3D anatomical model
+Source project: Charleeh/ecorche — https://github.com/Charleeh/ecorche
+Pinned source commit: 320805e06aee51e2e6f6b22533eb2a59d43f2d4d
+Model license: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+License text: assets/credits/CC-BY-SA-4.0.txt
+The model geometry is included unmodified. WOrkout changes per-mesh visibility for layer selection and does not make clinical claims about the model.
+Suggested credit: Écorché (github.com/Charleeh/ecorche), CC BY-SA 4.0. Based on BodyParts3D, © The Database Center for Life Science, CC BY 4.0, and Z-Anatomy by Gauthier Kervyn, CC BY-SA 4.0.
+BodyParts3D: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/
+Z-Anatomy: https://www.z-anatomy.com/ and https://github.com/Z-Anatomy/The-blend
+Full source attribution and modifications: https://github.com/Charleeh/ecorche/blob/320805e06aee51e2e6f6b22533eb2a59d43f2d4d/ATTRIBUTION.md
+The model is an educational visualization asset, not a medical device. It must not be used for diagnosis or treatment.

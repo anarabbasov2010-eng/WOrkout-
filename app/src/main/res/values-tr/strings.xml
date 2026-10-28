@@ -55,4 +55,7 @@
     <string name="anatomy_motion_title">Yumuşak hareket</string>
     <string name="anatomy_motion_subtitle">Nefes benzeri yavaş animasyon</string>
     <string name="anatomy_disclaimer">Stilize edilmiş eğitim modelidir, tıbbi atlas değildir. Kas vurguları temsilidir ve tıbbi tavsiye sayılmaz.</string>
+    <string name="anatomy_all_groups">Tüm gruplar</string>
+    <string name="anatomy_desc_all">Seçilen katmanın tamamı gösterilir. Kas yapılarını ayrı incelemek için bir grup seç.</string>
+    <string name="anatomy_asset_credit">Écorché anatomi modeli · CC BY-SA 4.0. BodyParts3D ve Z-Anatomy tabanlıdır.</string>
 </resources>
