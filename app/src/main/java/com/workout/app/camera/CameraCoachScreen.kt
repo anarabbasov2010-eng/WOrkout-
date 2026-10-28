@@ -40,10 +40,16 @@ import com.workout.app.pose.PoseRepCounter
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.roundToInt
 
 private val CoachLime = Color(0xFFB7F34A)
 private val CoachBg = Color(0xFF0B0D0C)
 private val CoachCard = Color(0xFF191D1B)
+
+private data class PoseMetrics(val angleDegrees: Float?, val confidence: Float, val cue: String) {
+    fun display(): String = if (angleDegrees == null) cue else "Joint angle: ${angleDegrees.roundToInt()}° · Pose confidence: ${(confidence * 100).roundToInt()}%\n$cue"
+}
 
 @Composable
 fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () -> Unit) {
@@ -57,6 +63,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
     var cameraError by remember { mutableStateOf<String?>(null) }
+    var poseFeedback by remember { mutableStateOf("Waiting for visible joint landmarks. Keep the full movement in frame.") }
     val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         permissionGranted = it
     }
@@ -89,6 +96,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
                     sessionReps = (sessionReps + 1).coerceAtMost(100_000)
                     onRepCount(sessionReps)
                 },
+                onPoseMetrics = { poseFeedback = it },
                 onError = { cameraError = it },
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
@@ -122,8 +130,9 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
                 }
             }
         }
+        Text(poseFeedback, color = if (poseFeedback.contains("Low confidence") || poseFeedback.contains("not visible")) Color(0xFFFFB45B) else Color(0xFFB7F34A), fontSize = 12.sp)
         Text(
-            cameraError ?: "Camera frames are processed on this device and are not saved or uploaded. Accuracy depends on lighting, framing and joint visibility. Stop if you feel pain or dizziness.",
+            cameraError ?: "On-device estimate, not a medical assessment. Frames are not saved or uploaded. Accuracy depends on lighting, framing and landmark visibility. Stop if you feel pain or dizziness.",
             color = Color(0xFFB8C0B8), fontSize = 11.sp
         )
     }
@@ -134,6 +143,7 @@ private fun CameraPreview(
     lifecycleOwner: androidx.lifecycle.LifecycleOwner,
     movement: AtomicReference<Movement>,
     onNewReps: (Int) -> Unit,
+    onPoseMetrics: (String) -> Unit,
     onError: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -143,6 +153,7 @@ private fun CameraPreview(
     val detectorRef = remember { AtomicReference<PoseDetector?>(null) }
     val main = remember { Handler(Looper.getMainLooper()) }
     val counterRef = remember { AtomicReference(movement.get() to PoseRepCounter(movement.get())) }
+    val lastMetricPost = remember { AtomicLong(0L) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -185,8 +196,13 @@ private fun CameraPreview(
                                 val image = InputImage.fromMediaImage(media, proxy.imageInfo.rotationDegrees)
                                 detector.process(image)
                                     .addOnSuccessListener { pose ->
-                                        val (angle, confidence) = extractAngle(pose, selected)
-                                        val value = pair.second.update(angle, confidence)
+                                        val metrics = extractPoseMetrics(pose, selected)
+                                        val value = pair.second.update(metrics.angleDegrees, metrics.confidence)
+                                        val now = System.currentTimeMillis()
+                                        if (now - lastMetricPost.get() >= 400L) {
+                                            lastMetricPost.set(now)
+                                            main.post { onPoseMetrics(metrics.display()) }
+                                        }
                                         if (value != null) main.post { onNewReps(value) }
                                     }
                                     .addOnFailureListener { error ->
@@ -206,14 +222,14 @@ private fun CameraPreview(
     )
 }
 
-private fun extractAngle(pose: Pose, movement: Movement): Pair<Float?, Float> {
+private fun extractPoseMetrics(pose: Pose, movement: Movement): PoseMetrics {
     val trio = when (movement) {
         Movement.SQUAT, Movement.LUNGE -> Triple(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE)
         Movement.PUSH_UP -> Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST)
         Movement.BICEP_CURL -> Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST)
     }
     val landmarks = listOf(trio.first, trio.second, trio.third).map { pose.getPoseLandmark(it) }
-    if (landmarks.any { it == null }) return null to 0f
+    if (landmarks.any { it == null }) return PoseMetrics(null, 0f, "Joint landmarks are not visible. Reframe the camera and improve lighting.")
     val first = landmarks[0]!!
     val middle = landmarks[1]!!
     val last = landmarks[2]!!
@@ -223,5 +239,24 @@ private fun extractAngle(pose: Pose, movement: Movement): Pair<Float?, Float> {
         middle.position.x, middle.position.y,
         last.position.x, last.position.y
     )
-    return angle to confidence
+    val cue = when {
+        confidence < PoseRepCounter.MIN_CONFIDENCE -> "Low confidence — move into a brighter, wider view."
+        !angle.isFinite() -> "Angle unavailable — keep the selected joints visible."
+        movement == Movement.SQUAT || movement == Movement.LUNGE -> when {
+            angle < 105f -> "Lower phase detected. Keep the knees tracking comfortably with the feet."
+            angle > 155f -> "Standing phase detected. Avoid forcefully locking the knees."
+            else -> "Mid-range detected. Move with control and maintain balance."
+        }
+        movement == Movement.PUSH_UP -> when {
+            angle < 100f -> "Elbows are in a bent phase. Keep the trunk controlled; stop if painful."
+            angle > 150f -> "Arms are near extension. Avoid forcefully locking the elbows."
+            else -> "Mid-range detected. Keep the movement smooth and controlled."
+        }
+        else -> when {
+            angle > 145f -> "Arm extension phase detected. Keep the upper arm controlled."
+            angle < 65f -> "Curl phase detected. Avoid swinging the torso."
+            else -> "Mid-range detected. Keep the upper arm controlled."
+        }
+    }
+    return PoseMetrics(angle.takeIf { it.isFinite() }, confidence, cue)
 }
