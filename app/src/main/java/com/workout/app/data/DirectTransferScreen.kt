@@ -1,5 +1,7 @@
 package com.workout.app.data
 
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -59,7 +61,7 @@ fun DirectTransferScreen(onBack: () -> Unit, onImported: (ByteArray) -> Unit) {
                 withContext(Dispatchers.IO) {
                     LocalTransfer.receive(45872, receiveCode) { encrypted ->
                         val plain = EncryptedBackup.decrypt(encrypted, secret)
-                        withContext(Dispatchers.Main) { onImported(plain) }
+                        Handler(Looper.getMainLooper()).post { onImported(plain) }
                     }
                 }
                 status = "Encrypted archive received and restored."
