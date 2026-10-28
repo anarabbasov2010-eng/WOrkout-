@@ -1,0 +1,107 @@
+name: Android CI and release
+
+on:
+  push:
+    branches: [main]
+    tags: ["stable-v*", "beta-v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Static checks, unit tests and debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Unit tests and debug build
+        run: gradle --no-daemon testDebugUnitTest assembleDebug --stacktrace
+      - name: Upload debug APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WOrkout-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WOrkout-unit-test-report
+          path: app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  signed-release:
+    name: Signed Stable/Beta release
+    if: startsWith(github.ref, 'refs/tags/stable-v') || startsWith(github.ref, 'refs/tags/beta-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+      - name: Validate signing secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then echo "::error::Missing repository secret $v"; exit 1; fi
+          done
+      - name: Prepare signing key outside repository
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          KEYSTORE="$RUNNER_TEMP/workout-release.jks"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          chmod 600 "$KEYSTORE"
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+      - name: Build signed APK and release manifest
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          gradle --no-daemon assembleRelease -PversionCode="$GITHUB_RUN_NUMBER" -PversionName="$GITHUB_REF_NAME" --stacktrace
+          CHANNEL="${GITHUB_REF_NAME%%-*}"
+          APK="app/build/outputs/apk/release/app-release.apk"
+          cp "$APK" "$RUNNER_TEMP/workout-$CHANNEL.apk"
+          SHA="$(sha256sum "$RUNNER_TEMP/workout-$CHANNEL.apk" | awk '{print $1}')"
+          CERT="$(keytool -exportcert -alias "$ANDROID_KEY_ALIAS" -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" | sha256sum | awk '{print toupper($1)}')"
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/workout-$CHANNEL.apk"
+          VERSION_CODE="$GITHUB_RUN_NUMBER"
+          printf '{"channel":"%s","versionCode":%s,"versionName":"%s","sha256":"%s","signerCertificateSha256":"%s","apkUrl":"%s"}\n' "$CHANNEL" "$VERSION_CODE" "$GITHUB_REF_NAME" "$SHA" "$CERT" "$URL" > "$RUNNER_TEMP/update-manifest.json"
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WOrkout ${{ github.ref_name }}
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/beta-v') }}
+          files: |
+            ${{ runner.temp }}/workout-*.apk
+            ${{ runner.temp }}/update-manifest.json
