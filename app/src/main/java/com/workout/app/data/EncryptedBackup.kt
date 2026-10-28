@@ -52,8 +52,18 @@ object EncryptedBackup {
 
     fun readFromUri(context: Context, uri: Uri, passphrase: CharArray): ByteArray =
         context.contentResolver.openInputStream(uri)?.use { input ->
-            val bytes = input.readNBytes(MAX_ARCHIVE_BYTES + magic.size + 16 + 12 + 16 + 1)
-            decrypt(bytes, passphrase)
+            val limit = MAX_ARCHIVE_BYTES + magic.size + 16 + 12 + 16
+            val output = java.io.ByteArrayOutputStream()
+            val buffer = ByteArray(8192)
+            var total = 0
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                total += count
+                require(total <= limit) { "Backup exceeds the supported size." }
+                output.write(buffer, 0, count)
+            }
+            decrypt(output.toByteArray(), passphrase)
         } ?: throw IllegalStateException("Could not open backup source.")
 
     private fun derive(password: CharArray, salt: ByteArray): SecretKeySpec {
