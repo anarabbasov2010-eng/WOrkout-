@@ -101,12 +101,12 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          gradle --no-daemon assembleRelease -PversionCode="$GITHUB_RUN_NUMBER" -PversionName="$GITHUB_REF_NAME" --stacktrace
+          CERT="$(keytool -exportcert -alias "$ANDROID_KEY_ALIAS" -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" | sha256sum | awk '{print toupper($1)}')"
+          gradle --no-daemon assembleRelease -PversionCode="$GITHUB_RUN_NUMBER" -PversionName="$GITHUB_REF_NAME" -PreleaseSignerSha256="$CERT" --stacktrace
           CHANNEL="${GITHUB_REF_NAME%%-*}"
           APK="app/build/outputs/apk/release/app-release.apk"
           cp "$APK" "$RUNNER_TEMP/workout-$CHANNEL.apk"
           SHA="$(sha256sum "$RUNNER_TEMP/workout-$CHANNEL.apk" | awk '{print $1}')"
-          CERT="$(keytool -exportcert -alias "$ANDROID_KEY_ALIAS" -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" | sha256sum | awk '{print toupper($1)}')"
           URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/workout-$CHANNEL.apk"
           VERSION_CODE="$GITHUB_RUN_NUMBER"
           printf '{"channel":"%s","versionCode":%s,"versionName":"%s","sha256":"%s","signerCertificateSha256":"%s","apkUrl":"%s"}\n' "$CHANNEL" "$VERSION_CODE" "$GITHUB_REF_NAME" "$SHA" "$CERT" "$URL" > "$RUNNER_TEMP/update-manifest.json"
