@@ -207,4 +207,8 @@
     <string name="camera_error_pose">No se pudo estimar la pose: %1$s</string>
     <string name="camera_error_start">No se pudo iniciar la cámara: %1$s</string>
     <string name="camera_error_unknown">error desconocido</string>
+    <string name="nutrition_portion_header">Tamaño de la porción</string>
+    <string name="nutrition_portion_size">%1$d g</string>
+    <string name="nutrition_portion_small">25 g</string>
+    <string name="nutrition_portion_large">500 g</string>
 </resources>

@@ -207,4 +207,8 @@
     <string name="camera_error_pose">Pozanı qiymətləndirmək mümkün olmadı: %1$s</string>
     <string name="camera_error_start">Kamera başlatıla bilmədi: %1$s</string>
     <string name="camera_error_unknown">naməlum xəta</string>
+    <string name="nutrition_portion_header">Porsiyanın ölçüsü</string>
+    <string name="nutrition_portion_size">%1$d q</string>
+    <string name="nutrition_portion_small">25 q</string>
+    <string name="nutrition_portion_large">500 q</string>
 </resources>

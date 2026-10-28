@@ -207,4 +207,8 @@
     <string name="camera_error_pose">Poz tahmin edilemedi: %1$s</string>
     <string name="camera_error_start">Kamera başlatılamadı: %1$s</string>
     <string name="camera_error_unknown">bilinmeyen hata</string>
+    <string name="nutrition_portion_header">Porsiyon miktarı</string>
+    <string name="nutrition_portion_size">%1$d g</string>
+    <string name="nutrition_portion_small">25 g</string>
+    <string name="nutrition_portion_large">500 g</string>
 </resources>

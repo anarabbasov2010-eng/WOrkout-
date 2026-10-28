@@ -226,9 +226,9 @@ private fun WOrkoutApp() {
                                     goal = nutritionGoal,
                                     onGoalChange = { nutritionGoal = it },
                                     onExcludedAllergensChange = { excludedAllergens = it },
-                                    onAddFood = { foodId ->
-                                        NutritionEngine.catalog[foodId]?.let { food ->
-                                            if (foodLog.size < 1_000) updateFoodLog(foodLog + NutritionLogEntry(foodId, food.servingGrams))
+                                    onAddFood = { foodId, grams ->
+                                        if (foodLog.size < 1_000 && grams in 1..5_000 && foodId in NutritionEngine.catalog) {
+                                            updateFoodLog(foodLog + NutritionLogEntry(foodId, grams))
                                         }
                                     },
                                     onRemoveFood = { index -> updateFoodLog(foodLog.filterIndexed { i, _ -> i != index }) },
@@ -698,7 +698,7 @@ private fun NutritionScreen(
     goal: String,
     onGoalChange: (String) -> Unit,
     onExcludedAllergensChange: (Set<String>) -> Unit,
-    onAddFood: (String) -> Unit,
+    onAddFood: (String, Int) -> Unit,
     onRemoveFood: (Int) -> Unit,
     onAddRecipe: (Recipe) -> Unit,
     onAddWater: () -> Unit
@@ -710,9 +710,14 @@ private fun NutritionScreen(
             .none { food -> food.allergens.any(excludedAllergens::contains) }
     }
     var selectedFoodId by remember { mutableStateOf(safeFoods.firstOrNull()?.id.orEmpty()) }
+    var selectedPortionGrams by remember { mutableFloatStateOf(100f) }
     var foodMenuOpen by remember { mutableStateOf(false) }
     LaunchedEffect(excludedAllergens) {
         if (safeFoods.none { it.id == selectedFoodId }) selectedFoodId = safeFoods.firstOrNull()?.id.orEmpty()
+    }
+    LaunchedEffect(selectedFoodId) {
+        selectedPortionGrams = safeFoods.firstOrNull { it.id == selectedFoodId }
+            ?.servingGrams?.toFloat()?.coerceIn(25f, 500f) ?: 100f
     }
     val selectedFood = safeFoods.firstOrNull { it.id == selectedFoodId }
     val summary = NutritionEngine.summarizeEntries(foodLog)
@@ -891,11 +896,30 @@ private fun NutritionScreen(
                         }
                     }
                     Button(
-                        onClick = { selectedFood?.let { onAddFood(it.id) } },
+                        onClick = { selectedFood?.let { onAddFood(it.id, selectedPortionGrams.toInt()) } },
                         enabled = selectedFood != null && foodLog.size < 1_000,
                         colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink)
                     ) {
                         Text(stringResource(R.string.nutrition_add_button), fontWeight = FontWeight.Bold)
+                    }
+                }
+                Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(17.dp)) {
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 11.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.nutrition_portion_header), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.nutrition_portion_size, selectedPortionGrams.toInt()), color = Lime, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                        }
+                        Slider(
+                            value = selectedPortionGrams,
+                            onValueChange = { selectedPortionGrams = it },
+                            valueRange = 25f..500f,
+                            steps = 18,
+                            colors = SliderDefaults.colors(thumbColor = Lime, activeTrackColor = Lime, inactiveTrackColor = Color(0xFF394139))
+                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(stringResource(R.string.nutrition_portion_small), color = Muted, fontSize = 10.sp)
+                            Text(stringResource(R.string.nutrition_portion_large), color = Muted, fontSize = 10.sp)
+                        }
                     }
                 }
             }
