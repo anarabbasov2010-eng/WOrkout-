@@ -18,7 +18,7 @@
         android:label="WOrkout"
         android:icon="@drawable/ic_workout"
         android:roundIcon="@drawable/ic_workout"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        android:theme="@style/Theme.WOrkout">
         <activity
             android:name=".MainActivity"
             android:screenOrientation="unspecified"
