@@ -63,4 +63,8 @@
     <string name="more_updates_title">Stable / Beta updates</string>
     <string name="more_updates_subtitle">Check releases and verify APK signatures</string>
     <string name="more_channel_note">Beta builds can be unstable. Stable releases require a maintainer-signed APK.</string>
+    <string name="more_tools_header">TOOLS</string>
+    <string name="more_data_header">DATA &amp; PRIVACY</string>
+    <string name="stable_channel_description">Recommended for everyday use</string>
+    <string name="beta_channel_description">Preview features and changes</string>
 </resources>

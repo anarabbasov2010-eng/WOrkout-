@@ -24,4 +24,8 @@
     <string name="more_updates_title">Stable / Beta güncellemeleri</string>
     <string name="more_updates_subtitle">Sürümleri ve APK imzalarını doğrula</string>
     <string name="more_channel_note">Beta sürümleri kararsız olabilir. Stable sürümler geliştirici tarafından imzalanmış APK gerektirir.</string>
+    <string name="more_tools_header">ARAÇLAR</string>
+    <string name="more_data_header">VERİLER VE GİZLİLİK</string>
+    <string name="stable_channel_description">Günlük kullanım için önerilir</string>
+    <string name="beta_channel_description">Önizleme özellikleri ve değişiklikler</string>
 </resources>

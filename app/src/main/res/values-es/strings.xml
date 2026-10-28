@@ -24,4 +24,8 @@
     <string name="more_updates_title">Actualizaciones Stable / Beta</string>
     <string name="more_updates_subtitle">Comprueba versiones y firmas del APK</string>
     <string name="more_channel_note">Las versiones beta pueden ser inestables. Las versiones estables requieren un APK firmado por el responsable.</string>
+    <string name="more_tools_header">HERRAMIENTAS</string>
+    <string name="more_data_header">DATOS Y PRIVACIDAD</string>
+    <string name="stable_channel_description">Recomendado para el uso diario</string>
+    <string name="beta_channel_description">Funciones y cambios preliminares</string>
 </resources>

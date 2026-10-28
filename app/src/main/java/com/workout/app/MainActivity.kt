@@ -735,42 +735,115 @@ private fun MoreScreen(
     onTransfer: () -> Unit,
     onUpdates: () -> Unit
 ) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(stringResource(R.string.nav_more), fontSize = 28.sp, fontWeight = FontWeight.Black)
-                Text(stringResource(R.string.more_subtitle), color = Muted, fontSize = 13.sp)
+                Text(stringResource(R.string.nav_more), fontSize = 29.sp, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.more_subtitle), color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
             }
         }
-        item { SettingRow(Icons.Filled.ViewInAr, stringResource(R.string.anatomy_studio), stringResource(R.string.more_anatomy_subtitle), onAnatomy) }
-        item { SettingRow(Icons.Filled.MusicNote, stringResource(R.string.music), stringResource(R.string.more_music_subtitle), onMusic) }
+        item {
+            Text(
+                stringResource(R.string.more_tools_header),
+                color = Muted,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.1.sp
+            )
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FeatureCard(
+                    stringResource(R.string.anatomy_studio),
+                    stringResource(R.string.more_anatomy_subtitle),
+                    Icons.Filled.ViewInAr,
+                    Modifier.weight(1f),
+                    onAnatomy
+                )
+                FeatureCard(
+                    stringResource(R.string.music),
+                    stringResource(R.string.more_music_subtitle),
+                    Icons.Filled.MusicNote,
+                    Modifier.weight(1f),
+                    onMusic
+                )
+            }
+        }
+        item {
+            Text(
+                stringResource(R.string.more_data_header),
+                color = Muted,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.1.sp
+            )
+        }
         item { SettingRow(Icons.Filled.Lock, stringResource(R.string.export_backup), stringResource(R.string.more_backup_subtitle), onBackup) }
         item { SettingRow(Icons.Filled.Wifi, stringResource(R.string.transfer), stringResource(R.string.more_transfer_subtitle), onTransfer) }
         item { SettingRow(Icons.Filled.SystemUpdate, stringResource(R.string.more_updates_title), stringResource(R.string.more_updates_subtitle), onUpdates) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(stringResource(R.string.update_channel), fontWeight = FontWeight.Bold)
-                    Text(stringResource(R.string.more_channel_note), color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(22.dp)) {
+                Column(
+                    Modifier.fillMaxWidth().padding(17.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                        Box(
+                            Modifier.size(36.dp).background(Surface2, RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.Tune, null, tint = Lime, modifier = Modifier.size(19.dp))
+                        }
+                        Text(stringResource(R.string.update_channel), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                    Text(
+                        stringResource(R.string.more_channel_note),
+                        color = Muted,
+                        fontSize = 12.sp,
+                        lineHeight = 18.sp
+                    )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (beta) stringResource(R.string.beta) else stringResource(R.string.stable), color = Lime, modifier = Modifier.weight(1f))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(if (beta) stringResource(R.string.beta) else stringResource(R.string.stable), color = Lime, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                stringResource(if (beta) R.string.beta_channel_description else R.string.stable_channel_description),
+                                color = Muted,
+                                fontSize = 11.sp
+                            )
+                        }
                         Switch(checked = beta, onCheckedChange = onBetaChange)
                     }
                 }
             }
         }
-        item { SettingRow(Icons.Filled.Security, stringResource(R.string.saved_data), stringResource(R.string.no_cloud), {}) }
+        item {
+            SettingRow(Icons.Filled.Security, stringResource(R.string.saved_data), stringResource(R.string.no_cloud), {})
+        }
     }
 }
-
 @Composable
 private fun SettingRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, summary: String, onClick: () -> Unit) {
-    Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(18.dp)) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = Lime, modifier = Modifier.size(26.dp))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) { Text(title, fontWeight = FontWeight.Bold); Text(summary, color = Muted, fontSize = 12.sp) }
-            Icon(Icons.Filled.ChevronRight, null, tint = Muted)
+    Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                Modifier.size(44.dp).background(Surface2, RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, tint = Lime, modifier = Modifier.size(23.dp))
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 18.sp)
+                Text(summary, color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+            }
+            Icon(Icons.Filled.ChevronRight, null, tint = Muted, modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -787,11 +860,19 @@ private fun StatTile(label: String, value: String, hint: String, modifier: Modif
 
 @Composable
 private fun FeatureCard(title: String, subtitle: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = modifier, colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
-        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(icon, null, tint = Lime, modifier = Modifier.size(28.dp))
-            Text(title, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = Muted, fontSize = 11.sp)
+    Card(onClick = onClick, modifier = modifier, colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(22.dp)) {
+        Column(
+            Modifier.fillMaxWidth().padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(11.dp)
+        ) {
+            Box(
+                Modifier.size(47.dp).background(Surface2, RoundedCornerShape(15.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, null, tint = Lime, modifier = Modifier.size(26.dp))
+            }
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 18.sp)
+            Text(subtitle, color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
         }
     }
 }

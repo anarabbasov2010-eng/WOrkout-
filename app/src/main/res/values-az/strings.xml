@@ -24,4 +24,8 @@
     <string name="more_updates_title">Stable / Beta yeniləmələri</string>
     <string name="more_updates_subtitle">Buraxılışları və APK imzalarını yoxla</string>
     <string name="more_channel_note">Beta versiyalar qeyri-sabit ola bilər. Stable buraxılışları maintainer tərəfindən imzalanmış APK tələb edir.</string>
+    <string name="more_tools_header">ALƏTLƏR</string>
+    <string name="more_data_header">MƏLUMATLAR VƏ MƏXFİLİK</string>
+    <string name="stable_channel_description">Gündəlik istifadə üçün tövsiyə olunur</string>
+    <string name="beta_channel_description">Sınaq funksiyaları və dəyişikliklər</string>
 </resources>

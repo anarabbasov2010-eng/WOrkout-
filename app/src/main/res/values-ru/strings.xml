@@ -63,4 +63,8 @@
     <string name="more_updates_title">Обновления Stable / Beta</string>
     <string name="more_updates_subtitle">Проверка релизов и подписи APK</string>
     <string name="more_channel_note">Бета-версии могут работать нестабильно. Стабильные релизы требуют APK с подписью разработчика.</string>
+    <string name="more_tools_header">ИНСТРУМЕНТЫ</string>
+    <string name="more_data_header">ДАННЫЕ И ПРИВАТНОСТЬ</string>
+    <string name="stable_channel_description">Рекомендуется для повседневного использования</string>
+    <string name="beta_channel_description">Предварительные функции и изменения</string>
 </resources>
