@@ -91,7 +91,7 @@ private fun WOrkoutApp() {
     val updateFoodLog: (List<NutritionLogEntry>) -> Unit = { entries ->
         val limited = entries.take(1_000).filter { it.foodId in NutritionEngine.catalog && it.grams in 1..5_000 }
         foodLog = limited
-        foodHistory = (foodHistory + (todayKey to limited)).toSortedMap().entries.takeLast(60).associate { it.key to it.value }
+        foodHistory = (foodHistory + (todayKey to limited)).toSortedMap().entries.toList().takeLast(60).associate { it.key to it.value }
     }
 
     val applyImportedState: (ByteArray) -> Unit = { bytes ->
@@ -113,7 +113,7 @@ private fun WOrkoutApp() {
     LaunchedEffect(completedWorkouts, waterMl, totalReps, persistenceReady, foodHistory, excludedAllergens, nutritionGoal) {
         if (persistenceReady) {
             val history = JSONObject().apply {
-                foodHistory.toSortedMap().entries.takeLast(60).forEach { (day, entries) ->
+                foodHistory.toSortedMap().entries.toList().takeLast(60).forEach { (day, entries) ->
                     put(day, JSONArray().apply {
                         entries.take(1_000).forEach { entry ->
                             put(JSONObject().put("foodId", entry.foodId).put("grams", entry.grams))
@@ -269,7 +269,7 @@ private fun loadFoodHistory(source: JSONObject?): Map<String, List<NutritionLogE
         }
         result[date] = entries
     }
-    return result.entries.takeLast(60).associate { it.key to it.value }
+    return result.entries.toList().takeLast(60).associate { it.key to it.value }
 }
 
 private fun loadExcludedAllergens(array: JSONArray?): Set<String> {
