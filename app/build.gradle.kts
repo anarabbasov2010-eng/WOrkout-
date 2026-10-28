@@ -1,3 +1,7 @@
+import java.io.File
+import java.net.URL
+import java.net.URLConnection
+import java.security.MessageDigest
 import java.util.Properties
 
 plugins {
@@ -97,8 +101,8 @@ val anatomyModelUrl = "https://raw.githubusercontent.com/Charleeh/ecorche/320805
 val anatomyModelExpectedSize = 14_314_536L
 val anatomyModelGitBlobSha1 = "4360e0abeed7892e2585f257857b6d2d040af85d"
 
-fun calculateAnatomyGitBlobSha1(file: java.io.File): String {
-    val digest = java.security.MessageDigest.getInstance("SHA-1")
+fun calculateAnatomyGitBlobSha1(file: File): String {
+    val digest = MessageDigest.getInstance("SHA-1")
     digest.update(("blob " + file.length() + "\u0000").toByteArray(Charsets.UTF_8))
     file.inputStream().buffered().use { input ->
         val buffer = ByteArray(16 * 1024)
@@ -108,7 +112,7 @@ fun calculateAnatomyGitBlobSha1(file: java.io.File): String {
             digest.update(buffer, 0, count)
         }
     }
-    return digest.digest().joinToString("") { "%02x".format(it) }
+    return digest.digest().joinToString("") { byte -> (byte.toInt() and 0xff).toString(16).padStart(2, '0') }
 }
 
 val downloadAnatomyModel by tasks.registering {
@@ -123,11 +127,10 @@ val downloadAnatomyModel by tasks.registering {
     doLast {
         val destination = anatomyModelFile.get().asFile
         destination.parentFile.mkdirs()
-        val connection = java.net.URL(anatomyModelUrl).openConnection().apply {
-            connectTimeout = 20_000
-            readTimeout = 120_000
-            useCaches = false
-        }
+        val connection: URLConnection = URL(anatomyModelUrl).openConnection()
+        connection.setConnectTimeout(20_000)
+        connection.setReadTimeout(120_000)
+        connection.setUseCaches(false)
         connection.getInputStream().buffered().use { input ->
             destination.outputStream().buffered().use { output -> input.copyTo(output) }
         }
