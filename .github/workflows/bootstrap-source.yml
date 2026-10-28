@@ -34,10 +34,10 @@ jobs:
             echo "No source payload in this push; nothing to import."
             exit 0
           fi
-          cat "${parts[@]}" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/WOrkout-source.zip"
-          unzip -t "$RUNNER_TEMP/WOrkout-source.zip"
+          cat "${parts[@]}" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/WOrkout-source.tar.xz"
+          tar -tJf "$RUNNER_TEMP/WOrkout-source.tar.xz" >/dev/null
           mkdir -p "$RUNNER_TEMP/WOrkout-import"
-          unzip -q "$RUNNER_TEMP/WOrkout-source.zip" -d "$RUNNER_TEMP/WOrkout-import"
+          tar -xJf "$RUNNER_TEMP/WOrkout-source.tar.xz" -C "$RUNNER_TEMP/WOrkout-import"
           test -f "$RUNNER_TEMP/WOrkout-import/WOrkout/settings.gradle.kts"
           rsync -a "$RUNNER_TEMP/WOrkout-import/WOrkout/" "$GITHUB_WORKSPACE/"
           rm -rf payload
