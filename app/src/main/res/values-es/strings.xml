@@ -101,4 +101,21 @@
     <string name="exercise_lunge">Zancada inversa</string>
     <string name="exercise_lunge_description">Piernas · equilibrio</string>
     <string name="exercise_lunge_sets">3 series × 8 por lado</string>
+    <string name="progress_overline">TU REGISTRO DE ENTRENAMIENTO</string>
+    <string name="progress_hero_body">Totales reales de tu actividad guardada. Sin rachas inventadas ni gráficos semanales ficticios.</string>
+    <string name="progress_totals">TOTALES HISTÓRICOS</string>
+    <string name="progress_hero_title">Cada sesión cuenta.</string>
+    <string name="progress_sessions">SESIONES</string>
+    <string name="progress_reps">REPETICIONES</string>
+    <string name="progress_milestones">Hitos</string>
+    <string name="progress_milestones_hint">Los objetivos pequeños hacen visible la constancia.</string>
+    <string name="progress_milestone_one_title">Primera sesión</string>
+    <string name="progress_milestone_one_desc">Empieza el hábito al terminar un entrenamiento.</string>
+    <string name="progress_milestone_ten_title">Diez sesiones</string>
+    <string name="progress_milestone_ten_desc">Construye una rutina repetible.</string>
+    <string name="progress_milestone_fifty_title">Cincuenta sesiones</string>
+    <string name="progress_milestone_fifty_desc">Un gran recorrido, sesión a sesión.</string>
+    <string name="progress_recovery_title">La recuperación importa</string>
+    <string name="progress_recovery_body">Esta versión inicial no lee el sueño, la frecuencia cardíaca ni datos de wearables. Escucha tus sensaciones, bebe agua y descansa.</string>
+    <string name="progress_recovery_footer">Detén el entrenamiento si sientes dolor, mareo o malestar.</string>
 </resources>

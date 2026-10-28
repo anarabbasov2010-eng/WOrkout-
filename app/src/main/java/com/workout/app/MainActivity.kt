@@ -844,26 +844,137 @@ private fun NutritionScreen(
 
 @Composable
 private fun ProgressScreen(completedWorkouts: Int, totalReps: Int) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { Text(stringResource(R.string.nav_progress), fontSize = 28.sp, fontWeight = FontWeight.Black) }
+    val milestones = listOf(
+        Triple(1, R.string.progress_milestone_one_title, R.string.progress_milestone_one_desc),
+        Triple(10, R.string.progress_milestone_ten_title, R.string.progress_milestone_ten_desc),
+        Triple(50, R.string.progress_milestone_fifty_title, R.string.progress_milestone_fifty_desc)
+    )
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 26.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StatTile("WORKOUTS", completedWorkouts.toString(), "logged", Modifier.weight(1f))
-                StatTile("REPS", totalReps.toString(), "camera/manual", Modifier.weight(1f))
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    stringResource(R.string.progress_overline),
+                    color = Lime,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.5.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(stringResource(R.string.nav_progress), fontSize = 28.sp, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.progress_hero_body), color = Muted, fontSize = 13.sp, lineHeight = 19.sp)
             }
         }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Recovery", fontSize = 19.sp, fontWeight = FontWeight.Bold)
-                    Text("Readiness must be based on sleep, subjective fatigue and recovery feedback. This starter build does not yet estimate medical or wearable readiness.", color = Muted, fontSize = 13.sp)
-                    Text("Rest is progress, too.", color = Lime, fontWeight = FontWeight.SemiBold)
+            Card(colors = CardDefaults.cardColors(containerColor = Surface2), shape = RoundedCornerShape(26.dp)) {
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(
+                            androidx.compose.ui.graphics.Brush.linearGradient(
+                                listOf(Color(0xFF2A3824), Color(0xFF1D241E), Surface2)
+                            )
+                        )
+                        .padding(19.dp),
+                    verticalArrangement = Arrangement.spacedBy(13.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier.size(43.dp).background(Color(0xFF35472A), RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.EmojiEvents, null, tint = Lime, modifier = Modifier.size(24.dp))
+                        }
+                        Spacer(Modifier.width(11.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(stringResource(R.string.progress_totals), color = Muted, fontSize = 9.sp, letterSpacing = 1.2.sp, fontWeight = FontWeight.ExtraBold)
+                            Text(stringResource(R.string.progress_hero_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 20.sp)
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {
+                        Column(
+                            Modifier.weight(1f).background(Color(0x40242B25), RoundedCornerShape(17.dp)).padding(13.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(stringResource(R.string.progress_sessions), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(completedWorkouts.toString(), color = Lime, fontSize = 31.sp, fontWeight = FontWeight.Black)
+                        }
+                        Column(
+                            Modifier.weight(1f).background(Color(0x40242B25), RoundedCornerShape(17.dp)).padding(13.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(stringResource(R.string.progress_reps), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(totalReps.toString(), color = Lime, fontSize = 31.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                }
+            }
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(stringResource(R.string.progress_milestones), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                Text(stringResource(R.string.progress_milestones_hint), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+            }
+        }
+        items(milestones.size) { index ->
+            val milestone = milestones[index]
+            val achieved = completedWorkouts >= milestone.first
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(19.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        Modifier.size(46.dp).background(if (achieved) Color(0xFF35472A) else Surface2, RoundedCornerShape(14.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            if (achieved) Icons.Filled.CheckCircle else Icons.Filled.Flag,
+                            null,
+                            tint = if (achieved) Lime else Muted,
+                            modifier = Modifier.size(23.dp)
+                        )
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(milestone.second), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(stringResource(milestone.third), color = Muted, fontSize = 11.sp, lineHeight = 15.sp)
+                        Spacer(Modifier.height(2.dp))
+                        LinearProgressIndicator(
+                            progress = (completedWorkouts.toFloat() / milestone.first.toFloat()).coerceIn(0f, 1f),
+                            color = if (achieved) Lime else Color(0xFF87966E),
+                            trackColor = Surface2,
+                            modifier = Modifier.fillMaxWidth().height(5.dp)
+                        )
+                    }
+                    Text(
+                        "${completedWorkouts.coerceAtMost(milestone.first)}/${milestone.first}",
+                        color = if (achieved) Lime else Muted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        item {
+            Card(colors = CardDefaults.cardColors(containerColor = Surface2), shape = RoundedCornerShape(21.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(Icons.Filled.FavoriteBorder, null, tint = Lime, modifier = Modifier.size(25.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(stringResource(R.string.progress_recovery_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.progress_recovery_body), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+                        Text(stringResource(R.string.progress_recovery_footer), color = Lime, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
     }
 }
-
 @Composable
 private fun MoreScreen(
     beta: Boolean,

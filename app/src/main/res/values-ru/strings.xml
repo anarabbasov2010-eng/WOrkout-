@@ -140,4 +140,21 @@
     <string name="exercise_lunge">Обратные выпады</string>
     <string name="exercise_lunge_description">Ноги · баланс</string>
     <string name="exercise_lunge_sets">3 подхода × 8 на сторону</string>
+    <string name="progress_overline">ТВОЙ ЖУРНАЛ ТРЕНИРОВОК</string>
+    <string name="progress_hero_body">Реальные итоги сохранённой активности. Без выдуманных серий и фальшивых недельных графиков.</string>
+    <string name="progress_totals">ЗА ВСЁ ВРЕМЯ</string>
+    <string name="progress_hero_title">Каждая тренировка важна.</string>
+    <string name="progress_sessions">СЕССИИ</string>
+    <string name="progress_reps">ПОВТОРЕНИЯ</string>
+    <string name="progress_milestones">Достижения</string>
+    <string name="progress_milestones_hint">Небольшие цели помогают видеть постоянство.</string>
+    <string name="progress_milestone_one_title">Первая тренировка</string>
+    <string name="progress_milestone_one_desc">Начни формировать привычку с одной завершённой сессии.</string>
+    <string name="progress_milestone_ten_title">Десять тренировок</string>
+    <string name="progress_milestone_ten_desc">Сформируй повторяемый режим занятий.</string>
+    <string name="progress_milestone_fifty_title">Пятьдесят тренировок</string>
+    <string name="progress_milestone_fifty_desc">Большой результат, собранный по одной тренировке.</string>
+    <string name="progress_recovery_title">Восстановление важно</string>
+    <string name="progress_recovery_body">Эта стартовая версия не считывает сон, пульс и данные часов. Ориентируйся на самочувствие, пей воду и делай перерывы.</string>
+    <string name="progress_recovery_footer">Остановись, если чувствуешь боль, головокружение или недомогание.</string>
 </resources>

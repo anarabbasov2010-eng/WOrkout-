@@ -140,4 +140,21 @@
     <string name="exercise_lunge">Reverse lunge</string>
     <string name="exercise_lunge_description">Legs · balance</string>
     <string name="exercise_lunge_sets">3 sets × 8 / side</string>
+    <string name="progress_overline">YOUR TRAINING LOG</string>
+    <string name="progress_hero_body">Real totals from your saved activity. No invented streaks or pretend weekly charts.</string>
+    <string name="progress_totals">ALL-TIME TOTALS</string>
+    <string name="progress_hero_title">Every session counts.</string>
+    <string name="progress_sessions">SESSIONS</string>
+    <string name="progress_reps">REPETITIONS</string>
+    <string name="progress_milestones">Milestones</string>
+    <string name="progress_milestones_hint">Small targets make consistency visible.</string>
+    <string name="progress_milestone_one_title">First session</string>
+    <string name="progress_milestone_one_desc">Start a habit by finishing one workout.</string>
+    <string name="progress_milestone_ten_title">Ten sessions</string>
+    <string name="progress_milestone_ten_desc">Build a repeatable training routine.</string>
+    <string name="progress_milestone_fifty_title">Fifty sessions</string>
+    <string name="progress_milestone_fifty_desc">A serious body of work, one session at a time.</string>
+    <string name="progress_recovery_title">Recovery matters</string>
+    <string name="progress_recovery_body">This starter build does not read sleep, heart rate or wearable data. Use your own feedback, hydrate and take breaks.</string>
+    <string name="progress_recovery_footer">Stop training if you feel pain, dizziness or unwell.</string>
 </resources>

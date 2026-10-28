@@ -101,4 +101,21 @@
     <string name="exercise_lunge">Geri hamle</string>
     <string name="exercise_lunge_description">Bacaklar · denge</string>
     <string name="exercise_lunge_sets">Her taraf için 3 set × 8</string>
+    <string name="progress_overline">ANTRENMAN KAYDIN</string>
+    <string name="progress_hero_body">Kaydedilen aktivitelerin gerçek toplamları. Uydurma seriler veya sahte haftalık grafikler yok.</string>
+    <string name="progress_totals">TÜM ZAMANLAR</string>
+    <string name="progress_hero_title">Her antrenman önemlidir.</string>
+    <string name="progress_sessions">SEANSLAR</string>
+    <string name="progress_reps">TEKRARLAR</string>
+    <string name="progress_milestones">Kilometre taşları</string>
+    <string name="progress_milestones_hint">Küçük hedefler devamlılığı görünür kılar.</string>
+    <string name="progress_milestone_one_title">İlk antrenman</string>
+    <string name="progress_milestone_one_desc">Bir antrenmanı bitirerek alışkanlık oluşturmaya başla.</string>
+    <string name="progress_milestone_ten_title">On antrenman</string>
+    <string name="progress_milestone_ten_desc">Tekrarlanabilir bir antrenman rutini oluştur.</string>
+    <string name="progress_milestone_fifty_title">Elli antrenman</string>
+    <string name="progress_milestone_fifty_desc">Her seansla büyüyen ciddi bir ilerleme.</string>
+    <string name="progress_recovery_title">Toparlanma önemlidir</string>
+    <string name="progress_recovery_body">Bu başlangıç sürümü uyku, nabız veya giyilebilir cihaz verilerini okumaz. Kendini dinle, su iç ve mola ver.</string>
+    <string name="progress_recovery_footer">Ağrı, baş dönmesi veya kötü hissetme durumunda antrenmanı bırak.</string>
 </resources>

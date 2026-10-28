@@ -101,4 +101,21 @@
     <string name="exercise_lunge">Geriyə addım</string>
     <string name="exercise_lunge_description">Ayaqlar · balans</string>
     <string name="exercise_lunge_sets">3 set × hər tərəfə 8</string>
+    <string name="progress_overline">MƏŞQ JURNALIN</string>
+    <string name="progress_hero_body">Yadda saxlanılan fəaliyyətin real nəticələri. Saxta seriyalar və uydurma həftəlik qrafiklər yoxdur.</string>
+    <string name="progress_totals">ÜMUMİ NƏTİCƏLƏR</string>
+    <string name="progress_hero_title">Hər məşq önəmlidir.</string>
+    <string name="progress_sessions">MƏŞQLƏR</string>
+    <string name="progress_reps">TƏKRARLAR</string>
+    <string name="progress_milestones">Mərhələlər</string>
+    <string name="progress_milestones_hint">Kiçik hədəflər davamlılığı görünən edir.</string>
+    <string name="progress_milestone_one_title">İlk məşq</string>
+    <string name="progress_milestone_one_desc">Bir məşqi bitirməklə vərdiş yaratmağa başla.</string>
+    <string name="progress_milestone_ten_title">On məşq</string>
+    <string name="progress_milestone_ten_desc">Davamlı məşq rejimi qur.</string>
+    <string name="progress_milestone_fifty_title">Əlli məşq</string>
+    <string name="progress_milestone_fifty_desc">Hər dəfə bir məşqlə böyük nəticə əldə et.</string>
+    <string name="progress_recovery_title">Bərpa vacibdir</string>
+    <string name="progress_recovery_body">Bu başlanğıc versiya yuxu, nəbz və saat məlumatlarını oxumur. Özünü necə hiss etdiyinə fikir ver, su iç və fasilə et.</string>
+    <string name="progress_recovery_footer">Ağrı, başgicəllənmə və ya narahatlıq hiss etsən, məşqi dayandır.</string>
 </resources>
