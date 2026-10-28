@@ -29,6 +29,7 @@ import com.workout.app.data.BackupScreen
 import com.workout.app.data.DirectTransferScreen
 import com.workout.app.data.EncryptedLocalStore
 import com.workout.app.data.NutritionEngine
+import com.workout.app.data.UpdateScreen
 import com.workout.app.music.MusicScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -137,6 +138,7 @@ private fun WOrkoutApp() {
                     }.onFailure { storageError = it.localizedMessage }
                 }
             )
+            "updates" -> UpdateScreen(onBack = { page = null })
             else -> {
                 if (!internet) {
                     ConnectionScreen(onRetry = { internet = hasInternet(context) }, storageError = storageError)
@@ -202,7 +204,8 @@ private fun WOrkoutApp() {
                                     onMusic = { page = "music" },
                                     onAnatomy = { page = "anatomy" },
                                     onBackup = { page = "backup" },
-                                    onTransfer = { page = "transfer" }
+                                    onTransfer = { page = "transfer" },
+                                    onUpdates = { page = "updates" }
                                 )
                             }
                         }
@@ -432,13 +435,22 @@ private fun ProgressScreen(completedWorkouts: Int, totalReps: Int) {
 }
 
 @Composable
-private fun MoreScreen(beta: Boolean, onBetaChange: (Boolean) -> Unit, onMusic: () -> Unit, onAnatomy: () -> Unit, onBackup: () -> Unit, onTransfer: () -> Unit) {
+private fun MoreScreen(
+    beta: Boolean,
+    onBetaChange: (Boolean) -> Unit,
+    onMusic: () -> Unit,
+    onAnatomy: () -> Unit,
+    onBackup: () -> Unit,
+    onTransfer: () -> Unit,
+    onUpdates: () -> Unit
+) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Text(stringResource(R.string.nav_more), fontSize = 28.sp, fontWeight = FontWeight.Black) }
         item { SettingRow(Icons.Filled.ViewInAr, stringResource(R.string.anatomy_studio), "Interactive stylized 3D model", onAnatomy) }
         item { SettingRow(Icons.Filled.MusicNote, stringResource(R.string.music), "Local audio and independent volume", onMusic) }
         item { SettingRow(Icons.Filled.Lock, stringResource(R.string.export_backup), "Password-protected encrypted archive", onBackup) }
         item { SettingRow(Icons.Filled.Wifi, stringResource(R.string.transfer), "Direct transfer over trusted local network", onTransfer) }
+        item { SettingRow(Icons.Filled.SystemUpdate, "Stable / Beta updates", "Check releases, verify APK and signer", onUpdates) }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp)) {
