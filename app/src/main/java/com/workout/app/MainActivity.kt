@@ -717,130 +717,304 @@ private fun NutritionScreen(
         NutritionEngine.catalog[entry.foodId]?.allergens?.any(excludedAllergens::contains) == true
     }
     val allergenOptions = listOf(
-        "dairy" to "Dairy", "egg" to "Egg", "gluten" to "Gluten", "soy" to "Soy", "tree-nuts" to "Tree nuts"
+        "dairy" to R.string.nutrition_allergen_dairy,
+        "egg" to R.string.nutrition_allergen_egg,
+        "gluten" to R.string.nutrition_allergen_gluten,
+        "soy" to R.string.nutrition_allergen_soy,
+        "tree-nuts" to R.string.nutrition_allergen_tree_nuts
     )
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { Text(stringResource(R.string.nav_nutrition), fontSize = 28.sp, fontWeight = FontWeight.Black) }
+    val goalOptions = listOf(
+        "Fat loss" to R.string.nutrition_goal_fat_loss,
+        "Maintain fitness" to R.string.nutrition_goal_maintain,
+        "Muscle gain" to R.string.nutrition_goal_gain
+    )
+
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 26.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(24.dp)) {
-                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("TODAY'S FOOD LOG", color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                    Text("${summary.calories} ${stringResource(R.string.calories)}", fontSize = 34.sp, fontWeight = FontWeight.Black)
-                    Text("Reference only: 2,200 kcal is not a personalized target.", color = Muted, fontSize = 11.sp)
-                    LinearProgressIndicator(progress = (summary.calories / 2200f).coerceIn(0f, 1f), color = Lime, trackColor = Surface2, modifier = Modifier.fillMaxWidth())
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Macro("Protein", summary.proteinGrams, Lime)
-                        Macro("Carbs", summary.carbsGrams, Color(0xFF6DABFF))
-                        Macro("Fat", summary.fatGrams, Color(0xFFFFB45B))
-                        Macro("Fiber", summary.fiberGrams, Color(0xFFC4A7FF))
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    stringResource(R.string.nutrition_overline),
+                    color = Lime,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.5.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(stringResource(R.string.nav_nutrition), fontSize = 28.sp, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.nutrition_intro), color = Muted, fontSize = 13.sp, lineHeight = 18.sp)
+            }
+        }
+        item {
+            Card(colors = CardDefaults.cardColors(containerColor = Surface2), shape = RoundedCornerShape(25.dp)) {
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(
+                            androidx.compose.ui.graphics.Brush.linearGradient(
+                                listOf(Color(0xFF2B3924), Color(0xFF202720), Surface2)
+                            )
+                        )
+                        .padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(11.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(stringResource(R.string.nutrition_log_header), color = Muted, fontSize = 10.sp, letterSpacing = 1.2.sp, fontWeight = FontWeight.ExtraBold)
+                            Text(
+                                stringResource(R.string.nutrition_calories_total, summary.calories),
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Black,
+                                lineHeight = 37.sp,
+                                color = Color.White
+                            )
+                        }
+                        Box(
+                            Modifier.size(44.dp).background(Color(0xFF35472A), RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.Restaurant, null, tint = Lime, modifier = Modifier.size(23.dp))
+                        }
                     }
-                    Text("${foodLog.size} logged items · stored on device by date", color = Muted, fontSize = 11.sp)
+                    Text(stringResource(R.string.nutrition_calorie_note), color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
+                    LinearProgressIndicator(
+                        progress = (summary.calories / 2200f).coerceIn(0f, 1f),
+                        color = Lime,
+                        trackColor = Color(0xFF394139),
+                        modifier = Modifier.fillMaxWidth().height(6.dp)
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Macro(stringResource(R.string.protein), summary.proteinGrams, Lime)
+                        Macro(stringResource(R.string.carbs), summary.carbsGrams, Color(0xFF6DABFF))
+                        Macro(stringResource(R.string.fat), summary.fatGrams, Color(0xFFFFB45B))
+                        Macro(stringResource(R.string.nutrition_fiber), summary.fiberGrams, Color(0xFFC4A7FF))
+                    }
+                    HorizontalDivider(color = Color(0x303D483B))
+                    Text(stringResource(R.string.nutrition_log_count, foodLog.size), color = Muted, fontSize = 11.sp)
                 }
             }
         }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Dietary exclusions", color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("Excluded allergens are hidden from food selection and recipe suggestions.", color = Muted, fontSize = 12.sp)
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        allergenOptions.take(3).forEach { (id, label) ->
-                            FilterChip(selected = id in excludedAllergens, onClick = {
-                                onExcludedAllergensChange(if (id in excludedAllergens) excludedAllergens - id else excludedAllergens + id)
-                            }, label = { Text(label, fontSize = 10.sp) })
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(21.dp)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                        Box(Modifier.size(37.dp).background(Surface2, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Shield, null, tint = Lime, modifier = Modifier.size(20.dp))
                         }
+                        Text(stringResource(R.string.nutrition_exclusions_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        allergenOptions.drop(3).forEach { (id, label) ->
-                            FilterChip(selected = id in excludedAllergens, onClick = {
-                                onExcludedAllergensChange(if (id in excludedAllergens) excludedAllergens - id else excludedAllergens + id)
-                            }, label = { Text(label, fontSize = 10.sp) })
+                    Text(stringResource(R.string.nutrition_exclusions_body), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        allergenOptions.forEach { (id, labelRes) ->
+                            FilterChip(
+                                selected = id in excludedAllergens,
+                                onClick = {
+                                    onExcludedAllergensChange(
+                                        if (id in excludedAllergens) excludedAllergens - id else excludedAllergens + id
+                                    )
+                                },
+                                label = { Text(stringResource(labelRes), fontSize = 10.sp, maxLines = 1) }
+                            )
                         }
                     }
                     if (currentConflicts > 0) {
-                        Text("Warning: $currentConflicts logged items include a currently excluded allergen. Review or remove them.", color = Color(0xFFFFB45B), fontSize = 11.sp)
+                        Text(
+                            stringResource(R.string.nutrition_conflict_warning, currentConflicts),
+                            color = Color(0xFFFFB45B),
+                            fontSize = 11.sp,
+                            lineHeight = 16.sp
+                        )
                     }
                 }
             }
         }
         item {
-            Text("Goal", fontWeight = FontWeight.Bold)
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                listOf("Fat loss", "Maintain fitness", "Muscle gain").forEach { option ->
-                    FilterChip(selected = goal == option, onClick = { onGoalChange(option) }, label = { Text(option, fontSize = 10.sp) })
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(stringResource(R.string.nutrition_goal_header), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    goalOptions.forEach { (option, labelRes) ->
+                        FilterChip(
+                            selected = goal == option,
+                            onClick = { onGoalChange(option) },
+                            label = { Text(stringResource(labelRes), fontSize = 10.sp, maxLines = 1) }
+                        )
+                    }
                 }
             }
         }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(18.dp)) {
-                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.WaterDrop, null, tint = Lime, modifier = Modifier.size(26.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(19.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(Modifier.size(43.dp).background(Surface2, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.WaterDrop, null, tint = Color(0xFF6DABFF), modifier = Modifier.size(25.dp))
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(stringResource(R.string.water), fontWeight = FontWeight.Bold)
-                        Text("${waterMl} ml logged · optional reminder", color = Muted, fontSize = 12.sp)
+                        Text(stringResource(R.string.nutrition_water_logged, waterMl), color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
                     }
-                    FilledTonalButton(onClick = onAddWater) { Text("+250") }
+                    FilledTonalButton(onClick = onAddWater) {
+                        Text(stringResource(R.string.nutrition_add_water), fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
         item {
-            Text("Add food", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f)) {
-                    OutlinedButton(onClick = { foodMenuOpen = true }, enabled = safeFoods.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
-                        Text(selectedFood?.name ?: "No foods match exclusions")
-                    }
-                    DropdownMenu(expanded = foodMenuOpen, onDismissRequest = { foodMenuOpen = false }) {
-                        safeFoods.forEach { food ->
-                            DropdownMenuItem(text = { Text(food.name) }, onClick = {
-                                selectedFoodId = food.id
-                                foodMenuOpen = false
-                            })
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Text(stringResource(R.string.nutrition_add_food), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.weight(1f)) {
+                        OutlinedButton(onClick = { foodMenuOpen = true }, enabled = safeFoods.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                if (selectedFood != null) stringResource(foodNameResource(selectedFood.id))
+                                else stringResource(R.string.nutrition_no_foods),
+                                maxLines = 1
+                            )
+                        }
+                        DropdownMenu(expanded = foodMenuOpen, onDismissRequest = { foodMenuOpen = false }) {
+                            safeFoods.forEach { food ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(foodNameResource(food.id))) },
+                                    onClick = {
+                                        selectedFoodId = food.id
+                                        foodMenuOpen = false
+                                    }
+                                )
+                            }
                         }
                     }
+                    Button(
+                        onClick = { selectedFood?.let { onAddFood(it.id) } },
+                        enabled = selectedFood != null && foodLog.size < 1_000,
+                        colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink)
+                    ) {
+                        Text(stringResource(R.string.nutrition_add_button), fontWeight = FontWeight.Bold)
+                    }
                 }
-                Button(onClick = { selectedFood?.let { onAddFood(it.id) } }, enabled = selectedFood != null && foodLog.size < 1_000,
-                    colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink)) { Text("Add") }
             }
         }
         if (foodLog.isEmpty()) {
-            item { Text("Nothing logged yet. Choose a food or add a recipe below.", color = Muted, fontSize = 12.sp) }
+            item {
+                Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(19.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(15.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(11.dp)
+                    ) {
+                        Icon(Icons.Filled.MenuBook, null, tint = Lime, modifier = Modifier.size(25.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(R.string.nutrition_empty_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(stringResource(R.string.nutrition_empty_log), color = Muted, fontSize = 11.sp, lineHeight = 16.sp)
+                        }
+                    }
+                }
+            }
         }
         items(foodLog.size) { index ->
             val entry = foodLog[index]
             val food = NutritionEngine.catalog[entry.foodId]
             if (food != null) {
                 val itemNutrition = NutritionEngine.nutritionForGrams(entry.foodId, entry.grams)
-                Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(16.dp)) {
-                    Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(food.name, fontWeight = FontWeight.SemiBold)
-                            Text("${entry.grams} g · ${itemNutrition.calories} kcal · P ${itemNutrition.proteinGrams} g · C ${itemNutrition.carbsGrams} g · F ${itemNutrition.fatGrams} g", color = Muted, fontSize = 11.sp)
+                Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(17.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(stringResource(foodNameResource(food.id)), fontWeight = FontWeight.SemiBold)
+                            Text(
+                                stringResource(
+                                    R.string.nutrition_food_summary,
+                                    entry.grams,
+                                    itemNutrition.calories,
+                                    itemNutrition.proteinGrams,
+                                    itemNutrition.carbsGrams,
+                                    itemNutrition.fatGrams
+                                ),
+                                color = Muted,
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp
+                            )
                         }
-                        TextButton(onClick = { onRemoveFood(index) }) { Text("Remove") }
+                        TextButton(onClick = { onRemoveFood(index) }) {
+                            Text(stringResource(R.string.nutrition_remove_button))
+                        }
                     }
                 }
             }
         }
-        item { Text(stringResource(R.string.recipes), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+        item { Text(stringResource(R.string.recipes), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold) }
         items(safeRecipes.size) { index ->
             val recipe = safeRecipes[index]
             val recipeNutrition = NutritionEngine.recipeNutrition(recipe)
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(18.dp)) {
-                Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(recipe.name, fontWeight = FontWeight.Bold)
-                        Text("${recipeNutrition.calories} kcal · ${recipeNutrition.proteinGrams} g protein · ${recipe.prepMinutes} min", color = Muted, fontSize = 12.sp)
-                        Text(recipe.ingredients.entries.joinToString { (id, grams) -> "${NutritionEngine.catalog[id]?.name ?: id}: ${grams} g" }, color = Muted, fontSize = 10.sp)
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(19.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(11.dp)
+                ) {
+                    Box(Modifier.size(42.dp).background(Surface2, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.RestaurantMenu, null, tint = Lime, modifier = Modifier.size(22.dp))
                     }
-                    FilledTonalButton(onClick = { onAddRecipe(recipe) }, enabled = foodLog.size + recipe.ingredients.size <= 1_000) { Text("Add meal") }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(stringResource(recipeNameResource(recipe.id)), fontWeight = FontWeight.Bold, fontSize = 13.sp, lineHeight = 17.sp)
+                        Text(
+                            stringResource(R.string.nutrition_recipe_summary, recipeNutrition.calories, recipeNutrition.proteinGrams, recipe.prepMinutes),
+                            color = Muted,
+                            fontSize = 11.sp,
+                            lineHeight = 15.sp
+                        )
+                        Text(
+                            recipe.ingredients.entries.joinToString { (id, grams) -> stringResource(foodNameResource(id)) + ": " + grams + " g" },
+                            color = Muted,
+                            fontSize = 10.sp,
+                            lineHeight = 14.sp
+                        )
+                    }
+                    FilledTonalButton(
+                        onClick = { onAddRecipe(recipe) },
+                        enabled = foodLog.size + recipe.ingredients.size <= 1_000
+                    ) {
+                        Text(stringResource(R.string.nutrition_add_meal), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
-        item { Text("Values are approximate. Verify food labels and ingredients; exclusions only filter the included sample catalog.", color = Muted, fontSize = 11.sp) }
+        item { Text(stringResource(R.string.nutrition_disclaimer), color = Muted, fontSize = 11.sp, lineHeight = 16.sp) }
     }
 }
+
+private fun foodNameResource(foodId: String): Int = when (foodId) {
+    "oats" -> R.string.food_oats
+    "yogurt" -> R.string.food_yogurt
+    "banana" -> R.string.food_banana
+    "eggs" -> R.string.food_eggs
+    "chicken" -> R.string.food_chicken
+    "rice" -> R.string.food_rice
+    "lentils" -> R.string.food_lentils
+    "salmon" -> R.string.food_salmon
+    "tofu" -> R.string.food_tofu
+    "milk" -> R.string.food_milk
+    "almonds" -> R.string.food_almonds
+    "spinach" -> R.string.food_spinach
+    "potato" -> R.string.food_potato
+    "olive-oil" -> R.string.food_olive_oil
+    "bread" -> R.string.food_bread
+    "beans" -> R.string.food_beans
+    else -> R.string.food_unknown
+}
+
+private fun recipeNameResource(recipeId: String): Int = when (recipeId) {
+    "oat-bowl" -> R.string.recipe_oat_bowl
+    "egg-toast" -> R.string.recipe_egg_toast
+    "chicken-rice" -> R.string.recipe_chicken_rice
+    "lentil-bowl" -> R.string.recipe_lentil_bowl
+    "salmon-rice" -> R.string.recipe_salmon_rice
+    "tofu-beans" -> R.string.recipe_tofu_beans
+    else -> R.string.recipe_unknown
+}
+
 
 @Composable
 private fun ProgressScreen(completedWorkouts: Int, totalReps: Int) {
