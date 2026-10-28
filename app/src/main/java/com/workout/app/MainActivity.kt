@@ -29,6 +29,7 @@ import com.workout.app.data.BackupScreen
 import com.workout.app.data.DirectTransferScreen
 import com.workout.app.data.EncryptedLocalStore
 import com.workout.app.data.NutritionEngine
+import com.workout.app.data.NutritionLogEntry
 import com.workout.app.data.Recipe
 import com.workout.app.data.UpdateScreen
 import com.workout.app.music.MusicScreen
