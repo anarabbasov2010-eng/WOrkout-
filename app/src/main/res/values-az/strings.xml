@@ -58,4 +58,21 @@
     <string name="anatomy_all_groups">Bütün qruplar</string>
     <string name="anatomy_desc_all">Seçilmiş qatın hamısı göstərilir. Ayrı əzələ strukturlarını görmək üçün qrup seç.</string>
     <string name="anatomy_asset_credit">Écorché anatomiya modeli · CC BY-SA 4.0. BodyParts3D və Z-Anatomy əsasında.</string>
+    <string name="music_back">Geri</string>
+    <string name="music_kicker">MƏŞQ SƏSİ</string>
+    <string name="music_title">Musiqi studiyası</string>
+    <string name="music_subtitle">Məşq üçün şəxsi saundtrekin</string>
+    <string name="music_source_label">ŞƏXSİ MUSİQİ</string>
+    <string name="music_choose_file">Musiqi seç</string>
+    <string name="music_no_track">Cihazdan audio fayl seç</string>
+    <string name="music_local_track">Yerli audio</string>
+    <string name="music_playing">SƏSLƏNİR</string>
+    <string name="music_paused">BAŞLAMAĞA HAZIRDIR</string>
+    <string name="music_play">Səsləndir</string>
+    <string name="music_pause">Fasilə</string>
+    <string name="music_restart">Mahnını yenidən başlat</string>
+    <string name="music_volume">Musiqi səsi</string>
+    <string name="music_volume_hint">Yalnız WOrkout pleyerinin səsini dəyişir, telefonun ümumi səsini yox.</string>
+    <string name="music_privacy_title">Musiqin sənin olaraq qalır</string>
+    <string name="music_privacy_body">Cihazında saxlanan audio faylı seç. WOrkout musiqini internetə yükləmir. Bu versiyada daxili mahnılar yoxdur.</string>
 </resources>

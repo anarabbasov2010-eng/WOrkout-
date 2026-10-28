@@ -97,4 +97,21 @@
     <string name="anatomy_all_groups">Все группы</string>
     <string name="anatomy_desc_all">Показан весь выбранный слой. Выбери группу, чтобы отдельно рассмотреть её мышцы.</string>
     <string name="anatomy_asset_credit">Анатомическая модель Écorché · CC BY-SA 4.0. Основана на BodyParts3D и Z-Anatomy.</string>
+    <string name="music_back">Назад</string>
+    <string name="music_kicker">ЗВУК ТРЕНИРОВКИ</string>
+    <string name="music_title">Музыкальная студия</string>
+    <string name="music_subtitle">Твой саундтрек для тренировок</string>
+    <string name="music_source_label">ТВОЯ МУЗЫКА</string>
+    <string name="music_choose_file">Выбрать трек</string>
+    <string name="music_no_track">Выбери локальный аудиофайл</string>
+    <string name="music_local_track">Локальное аудио</string>
+    <string name="music_playing">ВОСПРОИЗВЕДЕНИЕ</string>
+    <string name="music_paused">ГОТОВО К СТАРТУ</string>
+    <string name="music_play">Воспроизвести</string>
+    <string name="music_pause">Пауза</string>
+    <string name="music_restart">Начать трек сначала</string>
+    <string name="music_volume">Громкость музыки</string>
+    <string name="music_volume_hint">Меняет только громкость плеера WOrkout, а не общую громкость телефона.</string>
+    <string name="music_privacy_title">Твоя музыка остаётся твоей</string>
+    <string name="music_privacy_body">Выбери аудиофайл на устройстве. WOrkout не загружает твою музыку в интернет. В этой сборке нет встроенных треков.</string>
 </resources>

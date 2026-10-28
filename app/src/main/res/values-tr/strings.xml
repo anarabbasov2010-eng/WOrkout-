@@ -58,4 +58,21 @@
     <string name="anatomy_all_groups">Tüm gruplar</string>
     <string name="anatomy_desc_all">Seçilen katmanın tamamı gösterilir. Kas yapılarını ayrı incelemek için bir grup seç.</string>
     <string name="anatomy_asset_credit">Écorché anatomi modeli · CC BY-SA 4.0. BodyParts3D ve Z-Anatomy tabanlıdır.</string>
+    <string name="music_back">Geri</string>
+    <string name="music_kicker">ANTRENMAN SESİ</string>
+    <string name="music_title">Müzik stüdyosu</string>
+    <string name="music_subtitle">Antrenman müziğin</string>
+    <string name="music_source_label">KİŞİSEL SES</string>
+    <string name="music_choose_file">Parça seç</string>
+    <string name="music_no_track">Cihazından bir ses dosyası seç</string>
+    <string name="music_local_track">Yerel ses</string>
+    <string name="music_playing">ÇALIYOR</string>
+    <string name="music_paused">ÇALMAYA HAZIR</string>
+    <string name="music_play">Çal</string>
+    <string name="music_pause">Duraklat</string>
+    <string name="music_restart">Parçayı baştan başlat</string>
+    <string name="music_volume">Müzik ses seviyesi</string>
+    <string name="music_volume_hint">Yalnızca WOrkout oynatıcısının sesini değiştirir; telefonun genel sesini değiştirmez.</string>
+    <string name="music_privacy_title">Müziğin sana ait kalır</string>
+    <string name="music_privacy_body">Cihazında bulunan bir ses dosyası seç. WOrkout müziğini internete yüklemez. Bu sürümde yerleşik parçalar yoktur.</string>
 </resources>

@@ -58,4 +58,21 @@
     <string name="anatomy_all_groups">Todos los grupos</string>
     <string name="anatomy_desc_all">Se muestra toda la capa seleccionada. Elige un grupo para aislar sus estructuras musculares.</string>
     <string name="anatomy_asset_credit">Modelo anatómico Écorché · CC BY-SA 4.0. Basado en BodyParts3D y Z-Anatomy.</string>
+    <string name="music_back">Volver</string>
+    <string name="music_kicker">SONIDO DE ENTRENAMIENTO</string>
+    <string name="music_title">Estudio de música</string>
+    <string name="music_subtitle">Tu banda sonora de entrenamiento</string>
+    <string name="music_source_label">AUDIO PERSONAL</string>
+    <string name="music_choose_file">Elegir pista</string>
+    <string name="music_no_track">Elige un archivo de audio local</string>
+    <string name="music_local_track">Audio local</string>
+    <string name="music_playing">REPRODUCIENDO</string>
+    <string name="music_paused">LISTO PARA REPRODUCIR</string>
+    <string name="music_play">Reproducir</string>
+    <string name="music_pause">Pausar</string>
+    <string name="music_restart">Reiniciar pista</string>
+    <string name="music_volume">Volumen de música</string>
+    <string name="music_volume_hint">Cambia solo el volumen del reproductor de WOrkout, no el volumen general del dispositivo.</string>
+    <string name="music_privacy_title">Tu música sigue siendo tuya</string>
+    <string name="music_privacy_body">Elige un archivo de audio almacenado en tu dispositivo. WOrkout no sube tu música. Esta versión no incluye pistas.</string>
 </resources>

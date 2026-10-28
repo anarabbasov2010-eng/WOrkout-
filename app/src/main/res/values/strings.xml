@@ -97,4 +97,21 @@
     <string name="anatomy_all_groups">All groups</string>
     <string name="anatomy_desc_all">Showing the complete selected layer. Choose a group to isolate its named muscle structures.</string>
     <string name="anatomy_asset_credit">Écorché anatomical model · CC BY-SA 4.0. Based on BodyParts3D and Z-Anatomy.</string>
+    <string name="music_back">Back</string>
+    <string name="music_kicker">TRAINING SOUND</string>
+    <string name="music_title">Music studio</string>
+    <string name="music_subtitle">Your training soundtrack</string>
+    <string name="music_source_label">PERSONAL AUDIO</string>
+    <string name="music_choose_file">Choose track</string>
+    <string name="music_no_track">Choose a local audio file</string>
+    <string name="music_local_track">Local audio</string>
+    <string name="music_playing">PLAYING</string>
+    <string name="music_paused">READY TO PLAY</string>
+    <string name="music_play">Play</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_restart">Restart track</string>
+    <string name="music_volume">Music volume</string>
+    <string name="music_volume_hint">Changes WOrkout's player volume only, not your device's overall volume.</string>
+    <string name="music_privacy_title">Your music stays yours</string>
+    <string name="music_privacy_body">Choose an audio file stored on your device. WOrkout does not upload your music. No tracks are bundled with this build.</string>
 </resources>
