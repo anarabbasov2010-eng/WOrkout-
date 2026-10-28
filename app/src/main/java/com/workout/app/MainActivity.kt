@@ -78,7 +78,6 @@ private fun WOrkoutApp() {
     var completedWorkouts by remember { mutableIntStateOf(stored?.optInt("completedWorkouts", 0) ?: 0) }
     var waterMl by remember { mutableIntStateOf(stored?.optInt("waterMl", 750) ?: 750) }
     var totalReps by remember { mutableIntStateOf(stored?.optInt("totalReps", 0) ?: 0) }
-    var cameraSessionReps by remember { mutableIntStateOf(0) }
     var foodHistory by remember { mutableStateOf(loadFoodHistory(stored)) }
     var foodLog by remember { mutableStateOf(foodHistory[todayKey].orEmpty()) }
     var excludedAllergens by remember { mutableStateOf(loadExcludedAllergens(stored?.optJSONArray("excludedAllergens"))) }
@@ -140,10 +139,7 @@ private fun WOrkoutApp() {
         }
     }
 
-    val closePage: () -> Unit = {
-        if (page == "camera") cameraSessionReps = 0
-        page = null
-    }
+    val closePage: () -> Unit = { page = null }
     BackHandler(enabled = page != null) { closePage() }
 
     MaterialTheme(colorScheme = darkColorScheme(
@@ -155,11 +151,8 @@ private fun WOrkoutApp() {
         when (page) {
             "camera" -> CameraCoachScreen(
                 exercise = selectedExercise,
-                onRepCount = { sessionCount ->
-                    if (sessionCount > cameraSessionReps) {
-                        totalReps = (totalReps + sessionCount - cameraSessionReps).coerceAtMost(100_000)
-                        cameraSessionReps = sessionCount
-                    }
+                onRepCount = {
+                    totalReps = (totalReps + 1).coerceAtMost(100_000)
                 },
                 onBack = closePage
             )
