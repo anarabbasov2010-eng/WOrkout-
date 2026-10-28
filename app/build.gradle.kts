@@ -23,6 +23,7 @@ android {
         versionName = providers.gradleProperty("versionName").orElse("0.1.0").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+        buildConfigField("String", "RELEASE_SIGNER_SHA256", "\"${providers.gradleProperty("releaseSignerSha256").orElse("").get()}\"")
     }
 
     signingConfigs {
@@ -51,7 +52,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
     packaging {
         resources.excludes += setOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/DEPENDENCIES")
     }
