@@ -507,48 +507,186 @@ private fun WorkoutsScreen(onStart: (String) -> Unit, onAnatomy: () -> Unit, onC
     var seconds by remember { mutableIntStateOf(0) }
     var running by remember { mutableStateOf(false) }
     LaunchedEffect(running) {
-        while (running) { kotlinx.coroutines.delay(1000); seconds++ }
+        while (running) {
+            kotlinx.coroutines.delay(1000)
+            seconds++
+        }
     }
+    data class ExerciseCard(val id: String, val title: Int, val description: Int, val prescription: Int, val number: String)
     val exercises = listOf(
-        Triple("Squat", "Legs · glutes · core", "3 × 10"),
-        Triple("Push-up", "Chest · shoulders · triceps", "3 × 8"),
-        Triple("Bicep curl", "Biceps · forearms", "3 × 12"),
-        Triple("Lunge", "Legs · balance", "3 × 8 / side")
+        ExerciseCard("Squat", R.string.exercise_squat, R.string.exercise_squat_description, R.string.exercise_squat_sets, "01"),
+        ExerciseCard("Push-up", R.string.exercise_push_up, R.string.exercise_push_up_description, R.string.exercise_push_up_sets, "02"),
+        ExerciseCard("Bicep curl", R.string.exercise_curl, R.string.exercise_curl_description, R.string.exercise_curl_sets, "03"),
+        ExerciseCard("Lunge", R.string.exercise_lunge, R.string.exercise_lunge_description, R.string.exercise_lunge_sets, "04")
     )
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Text(stringResource(R.string.nav_workouts), fontSize = 28.sp, fontWeight = FontWeight.Black) }
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 26.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Surface2), shape = RoundedCornerShape(24.dp)) {
-                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("SESSION TIMER", color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                    Text(String.format("%02d:%02d", seconds / 60, seconds % 60), fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { running = !running }, colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink)) { Text(if (running) "Pause" else stringResource(R.string.start)) }
-                        OutlinedButton(onClick = { running = false; seconds = 0; onCompleted() }) { Text("Finish & log") }
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    stringResource(R.string.workouts_overline),
+                    color = Lime,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.5.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(stringResource(R.string.workouts_intro_title), fontSize = 28.sp, fontWeight = FontWeight.Black, lineHeight = 32.sp)
+                Text(stringResource(R.string.workouts_intro_body), color = Muted, fontSize = 13.sp, lineHeight = 19.sp)
+            }
+        }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Surface2),
+                shape = RoundedCornerShape(26.dp)
+            ) {
+                Column(
+                    Modifier.fillMaxWidth()
+                        .background(
+                            androidx.compose.ui.graphics.Brush.linearGradient(
+                                listOf(Color(0xFF2A3824), Color(0xFF202720), Surface2)
+                            )
+                        )
+                        .padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier.size(42.dp).background(Color(0xFF35472A), RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.Timer, null, tint = Lime, modifier = Modifier.size(23.dp))
+                        }
+                        Spacer(Modifier.width(11.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text(stringResource(R.string.workouts_session_label), color = Muted, fontSize = 9.sp, letterSpacing = 1.2.sp, fontWeight = FontWeight.ExtraBold)
+                            Text(
+                                stringResource(if (running) R.string.workouts_timer_running else R.string.workouts_timer_ready),
+                                color = Lime,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Text(
+                            "LIVE",
+                            color = if (running) Ink else Muted,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier
+                                .background(if (running) Lime else Color(0xFF303831), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 5.dp)
+                        )
+                    }
+                    Text(
+                        String.format("%02d:%02d", seconds / 60, seconds % 60),
+                        fontSize = 46.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        letterSpacing = (-1.1).sp,
+                        lineHeight = 50.sp
+                    )
+                    Text(
+                        stringResource(R.string.workouts_timer_hint),
+                        color = Muted,
+                        fontSize = 11.sp,
+                        lineHeight = 16.sp
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = { running = !running },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            Icon(if (running) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(if (running) R.string.workouts_timer_pause else R.string.workouts_timer_start), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                running = false
+                                if (seconds > 0) onCompleted()
+                                seconds = 0
+                            },
+                            enabled = seconds > 0,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(vertical = 12.dp)
+                        ) {
+                            Text(stringResource(R.string.workouts_timer_finish), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
                     }
                 }
             }
         }
-        item { Text(stringResource(R.string.choose_exercise), fontSize = 19.sp, fontWeight = FontWeight.Bold) }
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(stringResource(R.string.workouts_choose_header), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.workouts_choose_subtitle), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+                }
+                Text("04", color = Lime, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+            }
+        }
         items(exercises.size) { index ->
             val exercise = exercises[index]
-            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(18.dp)) {
-                Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(46.dp).background(Surface2, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) { Icon(Icons.Filled.FitnessCenter, null, tint = Lime) }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(exercise.first, fontWeight = FontWeight.Bold)
-                        Text(exercise.second, color = Muted, fontSize = 12.sp)
-                        Text(exercise.third, color = Lime, fontSize = 12.sp)
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Graphite),
+                shape = RoundedCornerShape(22.dp)
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        Modifier.size(54.dp).background(Surface2, RoundedCornerShape(17.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.FitnessCenter, null, tint = Lime, modifier = Modifier.size(25.dp))
                     }
-                    IconButton(onClick = { onStart(exercise.first) }) { Icon(Icons.Filled.Videocam, "Camera", tint = Lime) }
+                    Column(
+                        Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(stringResource(exercise.title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 18.sp)
+                        Text(stringResource(exercise.description), color = Muted, fontSize = 11.sp, lineHeight = 15.sp)
+                        Text(stringResource(exercise.prescription), color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text(exercise.number, color = Color(0xFF65705F), fontSize = 10.sp, fontWeight = FontWeight.ExtraBold)
+                        IconButton(
+                            onClick = { onStart(exercise.id) },
+                            modifier = Modifier.size(40.dp).background(Color(0xFF2E3B25), CircleShape)
+                        ) {
+                            Icon(Icons.Filled.PlayArrow, stringResource(R.string.workouts_camera_start), tint = Lime)
+                        }
+                    }
                 }
             }
         }
-        item { OutlinedButton(onClick = onAnatomy, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Filled.ViewInAr, null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.anatomy_studio)) } }
+        item {
+            Card(
+                onClick = onAnatomy,
+                colors = CardDefaults.cardColors(containerColor = Surface2),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(11.dp)
+                ) {
+                    Icon(Icons.Filled.ViewInAr, null, tint = Lime, modifier = Modifier.size(25.dp))
+                    Text(stringResource(R.string.workouts_anatomy_link), modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Icon(Icons.Filled.ChevronRight, null, tint = Muted)
+                }
+            }
+        }
     }
 }
-
 @Composable
 private fun NutritionScreen(
     waterMl: Int,
