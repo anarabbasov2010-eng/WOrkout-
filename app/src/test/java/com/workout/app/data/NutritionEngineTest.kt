@@ -25,4 +25,19 @@ class NutritionEngineTest {
         val recipe = Recipe("test", "test", mapOf("banana" to 236), 2)
         assertEquals(210, NutritionEngine.recipeNutrition(recipe).calories)
     }
+    @Test fun gramsAreScaledAndDailyLogTotalsAreCorrect() {
+        val banana = NutritionEngine.nutritionForGrams("banana", 118)
+        assertEquals(105, banana.calories)
+        val total = NutritionEngine.summarizeEntries(
+            listOf(NutritionLogEntry("banana", 118), NutritionLogEntry("oats", 40))
+        )
+        assertEquals(257, total.calories)
+        assertEquals(6, total.proteinGrams)
+    }
+
+    @Test fun unknownFoodsAndInvalidAmountsDoNotAddCalories() {
+        assertEquals(0, NutritionEngine.nutritionForGrams("not-in-catalog", 100).calories)
+        assertEquals(0, NutritionEngine.nutritionForGrams("banana", 0).calories)
+    }
+
 }

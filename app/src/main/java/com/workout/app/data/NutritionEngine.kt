@@ -38,6 +38,8 @@ data class DailySummary(
 
 data class NutritionGoal(val calories: Int, val proteinGrams: Int, val carbsGrams: Int, val fatGrams: Int)
 
+data class NutritionLogEntry(val foodId: String, val grams: Int)
+
 object NutritionEngine {
     val foods = listOf(
         FoodItem("oats", "Oats", 40, Nutrition(152, 5, 27, 3, 4), tags=setOf("vegetarian","breakfast"), approximatePrice=.14),
@@ -67,10 +69,11 @@ object NutritionEngine {
         Recipe("tofu-beans", "Tofu and bean skillet", mapOf("tofu" to 120, "beans" to 100, "spinach" to 80), 18, setOf("vegan","high-protein"))
     )
 
-    fun recipeNutrition(recipe: Recipe): Nutrition = recipe.ingredients.entries.fold(Nutrition(0,0,0,0,0)) { total, entry ->
-        val food = catalog[entry.key] ?: return@fold total
-        val scale = entry.value.toDouble() / food.servingGrams
-        total + Nutrition(
+    fun nutritionForGrams(foodId: String, grams: Int): Nutrition {
+        val food = catalog[foodId] ?: return Nutrition(0, 0, 0, 0, 0)
+        if (grams !in 1..5_000) return Nutrition(0, 0, 0, 0, 0)
+        val scale = grams.toDouble() / food.servingGrams
+        return Nutrition(
             (food.nutrition.calories * scale).toInt(),
             (food.nutrition.proteinGrams * scale).toInt(),
             (food.nutrition.carbsGrams * scale).toInt(),
@@ -78,6 +81,15 @@ object NutritionEngine {
             (food.nutrition.fiberGrams * scale).toInt()
         )
     }
+
+    fun summarizeEntries(entries: List<NutritionLogEntry>): Nutrition =
+        entries.take(1_000).fold(Nutrition(0, 0, 0, 0, 0)) { total, entry ->
+            total + nutritionForGrams(entry.foodId, entry.grams)
+        }
+
+    fun recipeNutrition(recipe: Recipe): Nutrition =
+        summarizeEntries(recipe.ingredients.map { (foodId, grams) -> NutritionLogEntry(foodId, grams) })
+
 
     fun dailySummary(foodIds: List<String>): DailySummary {
         val total = foodIds.mapNotNull(catalog::get).fold(Nutrition(0,0,0,0,0)) { acc, food -> acc + food.nutrition }

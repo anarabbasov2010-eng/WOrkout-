@@ -29,11 +29,14 @@ import com.workout.app.data.BackupScreen
 import com.workout.app.data.DirectTransferScreen
 import com.workout.app.data.EncryptedLocalStore
 import com.workout.app.data.NutritionEngine
+import com.workout.app.data.Recipe
 import com.workout.app.data.UpdateScreen
 import com.workout.app.music.MusicScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
+import java.time.LocalDate
 
 private val Ink = Color(0xFF0B0D0C)
 private val Graphite = Color(0xFF191D1B)
@@ -70,20 +73,61 @@ private fun WOrkoutApp() {
     var storageError by remember { mutableStateOf(loaded.exceptionOrNull()?.localizedMessage) }
     var tab by remember { mutableStateOf(MainTab.HOME) }
     var page by remember { mutableStateOf<String?>(null) }
+    val todayKey = remember { LocalDate.now().toString() }
     var completedWorkouts by remember { mutableIntStateOf(stored?.optInt("completedWorkouts", 0) ?: 0) }
     var waterMl by remember { mutableIntStateOf(stored?.optInt("waterMl", 750) ?: 750) }
     var totalReps by remember { mutableIntStateOf(stored?.optInt("totalReps", 0) ?: 0) }
+    var foodHistory by remember { mutableStateOf(loadFoodHistory(stored)) }
+    var foodLog by remember { mutableStateOf(foodHistory[todayKey].orEmpty()) }
+    var excludedAllergens by remember { mutableStateOf(loadExcludedAllergens(stored?.optJSONArray("excludedAllergens"))) }
+    var nutritionGoal by remember {
+        mutableStateOf(stored?.optString("nutritionGoal")?.takeIf { it in setOf("Fat loss", "Maintain fitness", "Muscle gain") } ?: "Maintain fitness")
+    }
     var internet by remember { mutableStateOf(hasInternet(context)) }
     var beta by remember { mutableStateOf(false) }
     var selectedExercise by remember { mutableStateOf("Squat") }
 
-    LaunchedEffect(completedWorkouts, waterMl, totalReps, persistenceReady) {
+    val updateFoodLog: (List<NutritionLogEntry>) -> Unit = { entries ->
+        val limited = entries.take(1_000).filter { it.foodId in NutritionEngine.catalog && it.grams in 1..5_000 }
+        foodLog = limited
+        foodHistory = (foodHistory + (todayKey to limited)).toSortedMap().entries.takeLast(60).associate { it.key to it.value }
+    }
+
+    val applyImportedState: (ByteArray) -> Unit = { bytes ->
+        runCatching {
+            val json = JSONObject(String(bytes, Charsets.UTF_8))
+            require(json.optInt("formatVersion", 0) == 1) { "Unsupported backup data format." }
+            completedWorkouts = json.optInt("completedWorkouts", 0).coerceIn(0, 1_000_000)
+            waterMl = json.optInt("waterMl", 750).coerceIn(0, 20_000)
+            totalReps = json.optInt("totalReps", 0).coerceIn(0, 100_000)
+            foodHistory = loadFoodHistory(json)
+            foodLog = foodHistory[todayKey].orEmpty()
+            excludedAllergens = loadExcludedAllergens(json.optJSONArray("excludedAllergens"))
+            nutritionGoal = json.optString("nutritionGoal").takeIf { it in setOf("Fat loss", "Maintain fitness", "Muscle gain") } ?: "Maintain fitness"
+            persistenceReady = true
+            storageError = null
+        }.onFailure { storageError = it.localizedMessage ?: "Could not restore backup." }
+    }
+
+    LaunchedEffect(completedWorkouts, waterMl, totalReps, persistenceReady, foodHistory, excludedAllergens, nutritionGoal) {
         if (persistenceReady) {
+            val history = JSONObject().apply {
+                foodHistory.toSortedMap().entries.takeLast(60).forEach { (day, entries) ->
+                    put(day, JSONArray().apply {
+                        entries.take(1_000).forEach { entry ->
+                            put(JSONObject().put("foodId", entry.foodId).put("grams", entry.grams))
+                        }
+                    })
+                }
+            }
             val state = JSONObject()
                 .put("formatVersion", 1)
                 .put("completedWorkouts", completedWorkouts.coerceIn(0, 1_000_000))
                 .put("waterMl", waterMl.coerceIn(0, 20_000))
                 .put("totalReps", totalReps.coerceIn(0, 100_000))
+                .put("foodLogByDate", history)
+                .put("excludedAllergens", JSONArray().apply { excludedAllergens.sorted().forEach { put(it) } })
+                .put("nutritionGoal", nutritionGoal)
             val result = withContext(Dispatchers.IO) {
                 runCatching { localStore.write(state.toString().toByteArray(Charsets.UTF_8)) }
             }
@@ -110,34 +154,8 @@ private fun WOrkoutApp() {
             )
             "anatomy" -> AnatomyStudioScreen(onBack = { page = null })
             "music" -> MusicScreen(onBack = { page = null })
-            "backup" -> BackupScreen(
-                onBack = { page = null },
-                onImported = { bytes ->
-                    runCatching {
-                        val json = JSONObject(String(bytes, Charsets.UTF_8))
-                        require(json.optInt("formatVersion", 0) == 1) { "Unsupported backup data format." }
-                        completedWorkouts = json.optInt("completedWorkouts", 0).coerceIn(0, 1_000_000)
-                        waterMl = json.optInt("waterMl", 750).coerceIn(0, 20_000)
-                        totalReps = json.optInt("totalReps", 0).coerceIn(0, 100_000)
-                        persistenceReady = true
-                        storageError = null
-                    }.onFailure { storageError = it.localizedMessage }
-                }
-            )
-            "transfer" -> DirectTransferScreen(
-                onBack = { page = null },
-                onImported = { bytes ->
-                    runCatching {
-                        val json = JSONObject(String(bytes, Charsets.UTF_8))
-                        require(json.optInt("formatVersion", 0) == 1) { "Unsupported backup data format." }
-                        completedWorkouts = json.optInt("completedWorkouts", 0).coerceIn(0, 1_000_000)
-                        waterMl = json.optInt("waterMl", 750).coerceIn(0, 20_000)
-                        totalReps = json.optInt("totalReps", 0).coerceIn(0, 100_000)
-                        persistenceReady = true
-                        storageError = null
-                    }.onFailure { storageError = it.localizedMessage }
-                }
-            )
+            "backup" -> BackupScreen(onBack = { page = null }, onImported = applyImportedState)
+            "transfer" -> DirectTransferScreen(onBack = { page = null }, onImported = applyImportedState)
             "updates" -> UpdateScreen(onBack = { page = null })
             else -> {
                 if (!internet) {
@@ -195,6 +213,21 @@ private fun WOrkoutApp() {
                                 )
                                 MainTab.NUTRITION -> NutritionScreen(
                                     waterMl = waterMl,
+                                    foodLog = foodLog,
+                                    excludedAllergens = excludedAllergens,
+                                    goal = nutritionGoal,
+                                    onGoalChange = { nutritionGoal = it },
+                                    onExcludedAllergensChange = { excludedAllergens = it },
+                                    onAddFood = { foodId ->
+                                        NutritionEngine.catalog[foodId]?.let { food ->
+                                            if (foodLog.size < 1_000) updateFoodLog(foodLog + NutritionLogEntry(foodId, food.servingGrams))
+                                        }
+                                    },
+                                    onRemoveFood = { index -> updateFoodLog(foodLog.filterIndexed { i, _ -> i != index }) },
+                                    onAddRecipe = { recipe ->
+                                        val additions = recipe.ingredients.map { (foodId, grams) -> NutritionLogEntry(foodId, grams) }
+                                        if (foodLog.size + additions.size <= 1_000) updateFoodLog(foodLog + additions)
+                                    },
                                     onAddWater = { waterMl = (waterMl + 250).coerceAtMost(20_000) }
                                 )
                                 MainTab.PROGRESS -> ProgressScreen(completedWorkouts, totalReps)
@@ -214,6 +247,34 @@ private fun WOrkoutApp() {
             }
         }
     }
+}
+
+
+private fun loadFoodHistory(source: JSONObject?): Map<String, List<NutritionLogEntry>> {
+    val history = source?.optJSONObject("foodLogByDate") ?: return emptyMap()
+    val allowedDate = Regex("\\d{4}-\\d{2}-\\d{2}")
+    val result = sortedMapOf<String, List<NutritionLogEntry>>()
+    val keys = history.keys()
+    while (keys.hasNext()) {
+        val date = keys.next()
+        if (!allowedDate.matches(date)) continue
+        val array = history.optJSONArray(date) ?: continue
+        val entries = mutableListOf<NutritionLogEntry>()
+        for (index in 0 until minOf(array.length(), 1_000)) {
+            val item = array.optJSONObject(index) ?: continue
+            val foodId = item.optString("foodId")
+            val grams = item.optInt("grams", 0)
+            if (foodId in NutritionEngine.catalog && grams in 1..5_000) entries.add(NutritionLogEntry(foodId, grams))
+        }
+        result[date] = entries
+    }
+    return result.entries.takeLast(60).associate { it.key to it.value }
+}
+
+private fun loadExcludedAllergens(array: JSONArray?): Set<String> {
+    if (array == null) return emptySet()
+    val allowed = setOf("dairy", "egg", "gluten", "soy", "tree-nuts")
+    return (0 until minOf(array.length(), 20)).map { array.optString(it) }.filter { it in allowed }.toSet()
 }
 
 private fun hasInternet(context: Context): Boolean {
@@ -355,30 +416,85 @@ private fun WorkoutsScreen(onStart: (String) -> Unit, onAnatomy: () -> Unit, onC
 }
 
 @Composable
-private fun NutritionScreen(waterMl: Int, onAddWater: () -> Unit) {
-    var goal by remember { mutableStateOf("Maintain fitness") }
-    val summary = NutritionEngine.dailySummary(listOf("oats", "yogurt", "banana", "eggs"))
+private fun NutritionScreen(
+    waterMl: Int,
+    foodLog: List<NutritionLogEntry>,
+    excludedAllergens: Set<String>,
+    goal: String,
+    onGoalChange: (String) -> Unit,
+    onExcludedAllergensChange: (Set<String>) -> Unit,
+    onAddFood: (String) -> Unit,
+    onRemoveFood: (Int) -> Unit,
+    onAddRecipe: (Recipe) -> Unit,
+    onAddWater: () -> Unit
+) {
+    val safeFoods = NutritionEngine.foods.filter { food -> food.allergens.none(excludedAllergens::contains) }
+    val safeRecipes = NutritionEngine.recipes.filter { recipe ->
+        recipe.ingredients.keys.mapNotNull(NutritionEngine.catalog::get)
+            .none { food -> food.allergens.any(excludedAllergens::contains) }
+    }
+    var selectedFoodId by remember { mutableStateOf(safeFoods.firstOrNull()?.id.orEmpty()) }
+    var foodMenuOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(excludedAllergens) {
+        if (safeFoods.none { it.id == selectedFoodId }) selectedFoodId = safeFoods.firstOrNull()?.id.orEmpty()
+    }
+    val selectedFood = safeFoods.firstOrNull { it.id == selectedFoodId }
+    val summary = NutritionEngine.summarizeEntries(foodLog)
+    val currentConflicts = foodLog.count { entry ->
+        NutritionEngine.catalog[entry.foodId]?.allergens?.any(excludedAllergens::contains) == true
+    }
+    val allergenOptions = listOf(
+        "dairy" to "Dairy", "egg" to "Egg", "gluten" to "Gluten", "soy" to "Soy", "tree-nuts" to "Tree nuts"
+    )
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item { Text(stringResource(R.string.nav_nutrition), fontSize = 28.sp, fontWeight = FontWeight.Black) }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(24.dp)) {
                 Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("DAILY SAMPLE LOG", color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    Text("TODAY'S FOOD LOG", color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                     Text("${summary.calories} ${stringResource(R.string.calories)}", fontSize = 34.sp, fontWeight = FontWeight.Black)
+                    Text("Reference only: 2,200 kcal is not a personalized target.", color = Muted, fontSize = 11.sp)
                     LinearProgressIndicator(progress = (summary.calories / 2200f).coerceIn(0f, 1f), color = Lime, trackColor = Surface2, modifier = Modifier.fillMaxWidth())
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Macro("Protein", summary.proteinGrams, Lime)
                         Macro("Carbs", summary.carbsGrams, Color(0xFF6DABFF))
                         Macro("Fat", summary.fatGrams, Color(0xFFFFB45B))
+                        Macro("Fiber", summary.fiberGrams, Color(0xFFC4A7FF))
+                    }
+                    Text("${foodLog.size} logged items · stored on device by date", color = Muted, fontSize = 11.sp)
+                }
+            }
+        }
+        item {
+            Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Dietary exclusions", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Excluded allergens are hidden from food selection and recipe suggestions.", color = Muted, fontSize = 12.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        allergenOptions.take(3).forEach { (id, label) ->
+                            FilterChip(selected = id in excludedAllergens, onClick = {
+                                onExcludedAllergensChange(if (id in excludedAllergens) excludedAllergens - id else excludedAllergens + id)
+                            }, label = { Text(label, fontSize = 10.sp) })
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        allergenOptions.drop(3).forEach { (id, label) ->
+                            FilterChip(selected = id in excludedAllergens, onClick = {
+                                onExcludedAllergensChange(if (id in excludedAllergens) excludedAllergens - id else excludedAllergens + id)
+                            }, label = { Text(label, fontSize = 10.sp) })
+                        }
+                    }
+                    if (currentConflicts > 0) {
+                        Text("Warning: $currentConflicts logged items include a currently excluded allergen. Review or remove them.", color = Color(0xFFFFB45B), fontSize = 11.sp)
                     }
                 }
             }
         }
-        item { Text("Goal", fontWeight = FontWeight.Bold) }
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("Fat loss", "Maintain fitness", "Muscle gain").forEach {
-                    FilterChip(selected = goal == it, onClick = { goal = it }, label = { Text(it, fontSize = 10.sp) })
+            Text("Goal", fontWeight = FontWeight.Bold)
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                listOf("Fat loss", "Maintain fitness", "Muscle gain").forEach { option ->
+                    FilterChip(selected = goal == option, onClick = { onGoalChange(option) }, label = { Text(option, fontSize = 10.sp) })
                 }
             }
         }
@@ -395,20 +511,61 @@ private fun NutritionScreen(waterMl: Int, onAddWater: () -> Unit) {
                 }
             }
         }
+        item {
+            Text("Add food", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.weight(1f)) {
+                    OutlinedButton(onClick = { foodMenuOpen = true }, enabled = safeFoods.isNotEmpty(), modifier = Modifier.fillMaxWidth()) {
+                        Text(selectedFood?.name ?: "No foods match exclusions")
+                    }
+                    DropdownMenu(expanded = foodMenuOpen, onDismissRequest = { foodMenuOpen = false }) {
+                        safeFoods.forEach { food ->
+                            DropdownMenuItem(text = { Text(food.name) }, onClick = {
+                                selectedFoodId = food.id
+                                foodMenuOpen = false
+                            })
+                        }
+                    }
+                }
+                Button(onClick = { selectedFood?.let { onAddFood(it.id) } }, enabled = selectedFood != null && foodLog.size < 1_000,
+                    colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink)) { Text("Add") }
+            }
+        }
+        if (foodLog.isEmpty()) {
+            item { Text("Nothing logged yet. Choose a food or add a recipe below.", color = Muted, fontSize = 12.sp) }
+        }
+        items(foodLog.size) { index ->
+            val entry = foodLog[index]
+            val food = NutritionEngine.catalog[entry.foodId]
+            if (food != null) {
+                val itemNutrition = NutritionEngine.nutritionForGrams(entry.foodId, entry.grams)
+                Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(16.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(food.name, fontWeight = FontWeight.SemiBold)
+                            Text("${entry.grams} g · ${itemNutrition.calories} kcal · P ${itemNutrition.proteinGrams} g · C ${itemNutrition.carbsGrams} g · F ${itemNutrition.fatGrams} g", color = Muted, fontSize = 11.sp)
+                        }
+                        TextButton(onClick = { onRemoveFood(index) }) { Text("Remove") }
+                    }
+                }
+            }
+        }
         item { Text(stringResource(R.string.recipes), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-        items(NutritionEngine.recipes.size) { index ->
-            val recipe = NutritionEngine.recipes[index]
+        items(safeRecipes.size) { index ->
+            val recipe = safeRecipes[index]
+            val recipeNutrition = NutritionEngine.recipeNutrition(recipe)
             Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(18.dp)) {
                 Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(recipe.name, fontWeight = FontWeight.Bold)
-                        Text("${NutritionEngine.recipeNutrition(recipe).calories} kcal · ${NutritionEngine.recipeNutrition(recipe).proteinGrams} g protein · ${recipe.prepMinutes} min", color = Muted, fontSize = 12.sp)
+                        Text("${recipeNutrition.calories} kcal · ${recipeNutrition.proteinGrams} g protein · ${recipe.prepMinutes} min", color = Muted, fontSize = 12.sp)
+                        Text(recipe.ingredients.entries.joinToString { (id, grams) -> "${NutritionEngine.catalog[id]?.name ?: id}: ${grams} g" }, color = Muted, fontSize = 10.sp)
                     }
-                    Icon(Icons.Filled.RestaurantMenu, null, tint = Lime)
+                    FilledTonalButton(onClick = { onAddRecipe(recipe) }, enabled = foodLog.size + recipe.ingredients.size <= 1_000) { Text("Add meal") }
                 }
             }
         }
-        item { Text("Values are estimates, not medical advice. Always verify ingredients and allergies.", color = Muted, fontSize = 11.sp) }
+        item { Text("Values are approximate. Verify food labels and ingredients; exclusions only filter the included sample catalog.", color = Muted, fontSize = 11.sp) }
     }
 }
 
