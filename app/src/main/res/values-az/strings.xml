@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">WOrkout</string><string name="nav_home">Əsas</string><string name="nav_workouts">Məşqlər</string><string name="nav_nutrition">Qidalanma</string><string name="nav_progress">İrəliləyiş</string><string name="nav_more">Daha çox</string><string name="greeting">Şəxsi məşq məkanınız</string><string name="start_workout">Məşqə başla</string><string name="today_plan">Bugünkü plan</string><string name="today_food">Bugünkü qidalanma</string><string name="camera_coach">Kamera ilə texnika məşqçisi</string><string name="anatomy_studio">3D anatomiya studiyası</string><string name="choose_exercise">Hərəkət seçin</string><string name="reps">Təkrarlar</string><string name="start">Başla</string><string name="stop">Dayandır</string><string name="sets">Setlər</string><string name="minutes">dəq</string><string name="calories">kkal</string><string name="protein">Protein</string><string name="carbs">Karbohidrat</string><string name="fat">Yağ</string><string name="water">Su</string><string name="add_water">250 ml su əlavə et</string><string name="recipes">Reseptlər</string><string name="shopping_list">Alış-veriş siyahısı</string><string name="saved_data">Şəxsi məlumatlar cihazda</string><string name="no_cloud">Məşq tarixçəniz yalnız bu cihazda qalır.</string><string name="settings">Parametrlər və məxfilik</string><string name="recovery">Bərpa</string><string name="music">Musiqi studiyası</string><string name="export_backup">Şifrələnmiş ehtiyat nüsxəni ixrac et</string><string name="import_backup">Ehtiyat nüsxəni idxal et</string><string name="transfer">Telefonlar arasında birbaşa köçürmə</string><string name="update_channel">Yeniləmə kanalı</string><string name="stable">Sabit</string><string name="beta">Beta</string><string name="permission_camera">Hərəkət texnikasının cihazda təhlili üçün kamera icazəsi lazımdır.</string><string name="camera_disabled">Kamera əlçatan deyil — təkrarları əl ilə sayın.</string><string name="reliable_estimate">Dəqiqlik işıqlandırma, bucaq və oynaqların görünməsindən asılıdır.</string>
+    <string name="home_overline">SƏNİN HƏRƏKƏT MƏKANIN</string>
+    <string name="home_hero_title">Daha güclü ol. İnamla hərəkət et.</string>
+    <string name="home_hero_body">Məşq, təkrarların izlənməsi və qidalanma bir yerdə.</string>
+    <string name="home_stat_workouts">MƏŞQLƏR</string>
+    <string name="home_stat_workouts_hint">tamamlanıb</string>
+    <string name="home_stat_reps">TƏKRARLAR</string>
+    <string name="home_stat_reps_hint">ümumi say</string>
+    <string name="home_today_heading">Bugünkü fokus</string>
+    <string name="home_today_subtitle">Sadə başla, öz tempində irəlilə</string>
+    <string name="home_recommended_title">Güc təməli</string>
+    <string name="home_recommended_subtitle">4 hərəkət · rahat tempdə</string>
+    <string name="home_quick_actions">WOrkout imkanlarını kəşf et</string>
+    <string name="home_anatomy_title">3D anatomiya</string>
+    <string name="home_anatomy_subtitle">Hərəkətləri öyrən</string>
+    <string name="home_nutrition_title">Qidalanma</string>
+    <string name="home_nutrition_subtitle">Yeməklər və makrolar</string>
+    <string name="more_subtitle">Alətlər, məlumatlar və tətbiq parametrləri.</string>
+    <string name="more_anatomy_subtitle">İnteraktiv 3D bədən modeli</string>
+    <string name="more_music_subtitle">Cihazdakı musiqi və ayrıca səs səviyyəsi</string>
+    <string name="more_backup_subtitle">Parolla qorunan şifrələnmiş arxiv</string>
+    <string name="more_transfer_subtitle">Ehtiyat nüsxəni cihazlar arasında birbaşa köçür</string>
+    <string name="more_updates_title">Stable / Beta yeniləmələri</string>
+    <string name="more_updates_subtitle">Buraxılışları və APK imzalarını yoxla</string>
+    <string name="more_channel_note">Beta versiyalar qeyri-sabit ola bilər. Stable buraxılışları maintainer tərəfindən imzalanmış APK tələb edir.</string>
 </resources>

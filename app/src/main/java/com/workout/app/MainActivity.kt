@@ -206,6 +206,7 @@ private fun WOrkoutApp() {
                             when (tab) {
                                 MainTab.HOME -> HomeScreen(
                                     completedWorkouts = completedWorkouts,
+                                    totalReps = totalReps,
                                     onStart = { tab = MainTab.WORKOUTS },
                                     onNutrition = { tab = MainTab.NUTRITION },
                                     onAnatomy = { page = "anatomy" }
@@ -318,60 +319,189 @@ private fun RecoveryScreen(message: String, onBackup: () -> Unit, onTransfer: ()
 }
 
 @Composable
-private fun HomeScreen(completedWorkouts: Int, onStart: () -> Unit, onNutrition: () -> Unit, onAnatomy: () -> Unit) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun HomeScreen(
+    completedWorkouts: Int,
+    totalReps: Int,
+    onStart: () -> Unit,
+    onNutrition: () -> Unit,
+    onAnatomy: () -> Unit
+) {
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
         item {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(44.dp).background(Lime, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-                    Text("W", color = Ink, fontSize = 28.sp, fontWeight = FontWeight.Black)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    Modifier.size(54.dp).background(Lime, RoundedCornerShape(18.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("W", color = Ink, fontSize = 32.sp, fontWeight = FontWeight.Black)
                 }
-                Column {
-                    Text("WOrkout", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("WOrkout", fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.7).sp)
                     Text(stringResource(R.string.greeting), fontSize = 12.sp, color = Muted)
                 }
-            }
-        }
-        item {
-            Column(Modifier.fillMaxWidth().background(
-                androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF263220), Graphite, Ink)),
-                RoundedCornerShape(28.dp)
-            ).padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("TODAY · PERSONAL PLAN", color = Lime, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.3.sp)
-                Text("Build strength.\nMove with control.", fontSize = 30.sp, fontWeight = FontWeight.Black, lineHeight = 34.sp)
-                Text("Training that adapts to your goals, equipment and recovery feedback.", color = Muted, fontSize = 13.sp)
-                Button(onClick = onStart, colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink), shape = RoundedCornerShape(16.dp)) {
-                    Icon(Icons.Filled.PlayArrow, null); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.start_workout), fontWeight = FontWeight.Bold)
+                Box(
+                    Modifier.size(42.dp).background(Graphite, RoundedCornerShape(15.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.Bolt, null, tint = Lime, modifier = Modifier.size(22.dp))
                 }
             }
         }
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StatTile("WORKOUTS", completedWorkouts.toString(), "logged sessions", Modifier.weight(1f))
-                StatTile("WEEKLY GOAL", if (completedWorkouts == 0) "0%" else "${(completedWorkouts.coerceAtMost(5) * 20)}%", "personal target", Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            listOf(Color(0xFF293B20), Color(0xFF1A211B), Color(0xFF151917))
+                        ),
+                        RoundedCornerShape(30.dp)
+                    )
+                    .padding(22.dp)
+            ) {
+                Icon(
+                    Icons.Filled.FitnessCenter,
+                    null,
+                    tint = Lime.copy(alpha = 0.15f),
+                    modifier = Modifier.align(Alignment.TopEnd).size(94.dp).padding(4.dp)
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Box(Modifier.size(7.dp).background(Lime, RoundedCornerShape(4.dp)))
+                        Text(
+                            stringResource(R.string.home_overline),
+                            color = Lime,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.home_hero_title),
+                        modifier = Modifier.fillMaxWidth(0.88f),
+                        fontSize = 31.sp,
+                        fontWeight = FontWeight.Black,
+                        lineHeight = 35.sp,
+                        letterSpacing = (-0.7).sp
+                    )
+                    Text(
+                        stringResource(R.string.home_hero_body),
+                        modifier = Modifier.fillMaxWidth(0.94f),
+                        color = Muted,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Button(
+                        onClick = onStart,
+                        colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink),
+                        shape = RoundedCornerShape(17.dp),
+                        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 13.dp)
+                    ) {
+                        Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(22.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.start_workout), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
+                }
             }
         }
-        item { Text(stringResource(R.string.today_plan), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FeatureCard("3D anatomy", "Explore movement", Icons.Filled.ViewInAr, Modifier.weight(1f), onAnatomy)
-                FeatureCard("Nutrition", "Meals and macros", Icons.Filled.Restaurant, Modifier.weight(1f), onNutrition)
+                StatTile(
+                    stringResource(R.string.home_stat_workouts),
+                    completedWorkouts.toString(),
+                    stringResource(R.string.home_stat_workouts_hint),
+                    Modifier.weight(1f)
+                )
+                StatTile(
+                    stringResource(R.string.home_stat_reps),
+                    totalReps.toString(),
+                    stringResource(R.string.home_stat_reps_hint),
+                    Modifier.weight(1f)
+                )
+            }
+        }
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(stringResource(R.string.home_today_heading), fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.home_today_subtitle), color = Muted, fontSize = 12.sp)
+                }
+                Icon(Icons.Filled.ArrowForward, null, tint = Lime, modifier = Modifier.size(21.dp))
+            }
+        }
+        item {
+            Card(
+                onClick = onStart,
+                colors = CardDefaults.cardColors(containerColor = Surface2),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(17.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Box(
+                        Modifier.size(60.dp).background(Color(0xFF303D26), RoundedCornerShape(19.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.FitnessCenter, null, tint = Lime, modifier = Modifier.size(30.dp))
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(stringResource(R.string.home_recommended_title), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.home_recommended_subtitle), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
+                        Text(stringResource(R.string.start_workout), color = Lime, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Icon(Icons.Filled.ChevronRight, null, tint = Muted, modifier = Modifier.size(25.dp))
+                }
+            }
+        }
+        item {
+            Text(stringResource(R.string.home_quick_actions), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                FeatureCard(
+                    stringResource(R.string.home_anatomy_title),
+                    stringResource(R.string.home_anatomy_subtitle),
+                    Icons.Filled.ViewInAr,
+                    Modifier.weight(1f),
+                    onAnatomy
+                )
+                FeatureCard(
+                    stringResource(R.string.home_nutrition_title),
+                    stringResource(R.string.home_nutrition_subtitle),
+                    Icons.Filled.Restaurant,
+                    Modifier.weight(1f),
+                    onNutrition
+                )
             }
         }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
-                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     Icon(Icons.Filled.Security, null, tint = Lime, modifier = Modifier.size(26.dp))
-                    Spacer(Modifier.width(12.dp))
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(stringResource(R.string.saved_data), fontWeight = FontWeight.SemiBold)
-                        Text(stringResource(R.string.no_cloud), color = Muted, fontSize = 12.sp)
+                        Text(stringResource(R.string.no_cloud), color = Muted, fontSize = 12.sp, lineHeight = 17.sp)
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 private fun WorkoutsScreen(onStart: (String) -> Unit, onAnatomy: () -> Unit, onCompleted: () -> Unit) {
     var seconds by remember { mutableIntStateOf(0) }
@@ -606,17 +736,22 @@ private fun MoreScreen(
     onUpdates: () -> Unit
 ) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Text(stringResource(R.string.nav_more), fontSize = 28.sp, fontWeight = FontWeight.Black) }
-        item { SettingRow(Icons.Filled.ViewInAr, stringResource(R.string.anatomy_studio), "Interactive stylized 3D model", onAnatomy) }
-        item { SettingRow(Icons.Filled.MusicNote, stringResource(R.string.music), "Local audio and independent volume", onMusic) }
-        item { SettingRow(Icons.Filled.Lock, stringResource(R.string.export_backup), "Password-protected encrypted archive", onBackup) }
-        item { SettingRow(Icons.Filled.Wifi, stringResource(R.string.transfer), "Direct transfer over trusted local network", onTransfer) }
-        item { SettingRow(Icons.Filled.SystemUpdate, "Stable / Beta updates", "Check releases, verify APK and signer", onUpdates) }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(stringResource(R.string.nav_more), fontSize = 28.sp, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.more_subtitle), color = Muted, fontSize = 13.sp)
+            }
+        }
+        item { SettingRow(Icons.Filled.ViewInAr, stringResource(R.string.anatomy_studio), stringResource(R.string.more_anatomy_subtitle), onAnatomy) }
+        item { SettingRow(Icons.Filled.MusicNote, stringResource(R.string.music), stringResource(R.string.more_music_subtitle), onMusic) }
+        item { SettingRow(Icons.Filled.Lock, stringResource(R.string.export_backup), stringResource(R.string.more_backup_subtitle), onBackup) }
+        item { SettingRow(Icons.Filled.Wifi, stringResource(R.string.transfer), stringResource(R.string.more_transfer_subtitle), onTransfer) }
+        item { SettingRow(Icons.Filled.SystemUpdate, stringResource(R.string.more_updates_title), stringResource(R.string.more_updates_subtitle), onUpdates) }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Graphite), shape = RoundedCornerShape(20.dp)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp)) {
                     Text(stringResource(R.string.update_channel), fontWeight = FontWeight.Bold)
-                    Text("Beta may contain unstable features. Stable releases require a maintainer-signed APK.", color = Muted, fontSize = 12.sp)
+                    Text(stringResource(R.string.more_channel_note), color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(if (beta) stringResource(R.string.beta) else stringResource(R.string.stable), color = Lime, modifier = Modifier.weight(1f))
                         Switch(checked = beta, onCheckedChange = onBetaChange)

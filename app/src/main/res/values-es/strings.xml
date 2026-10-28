@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">WOrkout</string><string name="nav_home">Inicio</string><string name="nav_workouts">Entrenamientos</string><string name="nav_nutrition">Nutrición</string><string name="nav_progress">Progreso</string><string name="nav_more">Más</string><string name="greeting">Tu espacio personal de entrenamiento</string><string name="start_workout">Empezar entrenamiento</string><string name="today_plan">Plan de hoy</string><string name="today_food">Nutrición de hoy</string><string name="camera_coach">Entrenador técnico con cámara</string><string name="anatomy_studio">Estudio de anatomía 3D</string><string name="choose_exercise">Elegir ejercicio</string><string name="reps">Repeticiones</string><string name="start">Empezar</string><string name="stop">Detener</string><string name="sets">Series</string><string name="minutes">min</string><string name="calories">kcal</string><string name="protein">Proteína</string><string name="carbs">Carbohidratos</string><string name="fat">Grasas</string><string name="water">Agua</string><string name="add_water">Añadir 250 ml de agua</string><string name="recipes">Recetas</string><string name="shopping_list">Lista de compras</string><string name="saved_data">Datos privados en el dispositivo</string><string name="no_cloud">Tu historial de entrenamiento permanece en este dispositivo.</string><string name="settings">Ajustes y privacidad</string><string name="recovery">Recuperación</string><string name="music">Estudio musical</string><string name="export_backup">Exportar copia cifrada</string><string name="import_backup">Importar copia</string><string name="transfer">Transferencia directa entre teléfonos</string><string name="update_channel">Canal de actualización</string><string name="stable">Estable</string><string name="beta">Beta</string><string name="permission_camera">Se necesita la cámara para analizar la técnica en el dispositivo.</string><string name="camera_disabled">Cámara no disponible: usa el recuento manual.</string><string name="reliable_estimate">La precisión depende de la luz, el encuadre y la visibilidad.</string>
+    <string name="home_overline">TU ESPACIO DE MOVIMIENTO</string>
+    <string name="home_hero_title">Gana fuerza. Muévete con confianza.</string>
+    <string name="home_hero_body">Entrenamiento, control de repeticiones y nutrición en un solo lugar.</string>
+    <string name="home_stat_workouts">ENTRENAMIENTOS</string>
+    <string name="home_stat_workouts_hint">completados</string>
+    <string name="home_stat_reps">REPETICIONES</string>
+    <string name="home_stat_reps_hint">contadas en total</string>
+    <string name="home_today_heading">Enfoque de hoy</string>
+    <string name="home_today_subtitle">Empieza con algo sencillo y a tu ritmo</string>
+    <string name="home_recommended_title">Base de fuerza</string>
+    <string name="home_recommended_subtitle">4 ejercicios · a tu propio ritmo</string>
+    <string name="home_quick_actions">Descubre WOrkout</string>
+    <string name="home_anatomy_title">Anatomía 3D</string>
+    <string name="home_anatomy_subtitle">Explora el movimiento</string>
+    <string name="home_nutrition_title">Nutrición</string>
+    <string name="home_nutrition_subtitle">Comidas y macros</string>
+    <string name="more_subtitle">Herramientas, datos y ajustes de la aplicación.</string>
+    <string name="more_anatomy_subtitle">Explora el modelo 3D interactivo</string>
+    <string name="more_music_subtitle">Audio local y control de volumen independiente</string>
+    <string name="more_backup_subtitle">Archivo cifrado protegido con contraseña</string>
+    <string name="more_transfer_subtitle">Transfiere una copia directamente entre dispositivos</string>
+    <string name="more_updates_title">Actualizaciones Stable / Beta</string>
+    <string name="more_updates_subtitle">Comprueba versiones y firmas del APK</string>
+    <string name="more_channel_note">Las versiones beta pueden ser inestables. Las versiones estables requieren un APK firmado por el responsable.</string>
 </resources>
