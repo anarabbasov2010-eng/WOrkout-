@@ -703,6 +703,7 @@ private fun NutritionScreen(
     onAddRecipe: (Recipe) -> Unit,
     onAddWater: () -> Unit
 ) {
+    val context = LocalContext.current
     val safeFoods = NutritionEngine.foods.filter { food -> food.allergens.none(excludedAllergens::contains) }
     val safeRecipes = NutritionEngine.recipes.filter { recipe ->
         recipe.ingredients.keys.mapNotNull(NutritionEngine.catalog::get)
@@ -968,7 +969,7 @@ private fun NutritionScreen(
                             lineHeight = 15.sp
                         )
                         Text(
-                            recipe.ingredients.entries.joinToString { (id, grams) -> stringResource(foodNameResource(id)) + ": " + grams + " g" },
+                            recipe.ingredients.entries.joinToString { (id, grams) -> context.getString(foodNameResource(id)) + ": " + grams + " g" },
                             color = Muted,
                             fontSize = 10.sp,
                             lineHeight = 14.sp
