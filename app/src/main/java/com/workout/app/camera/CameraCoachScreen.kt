@@ -52,6 +52,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
     val initialMovement = Movement.entries.firstOrNull { it.label.equals(exercise, ignoreCase = true) } ?: Movement.SQUAT
     var movement by remember(exercise) { mutableStateOf(initialMovement) }
     var reps by remember { mutableIntStateOf(0) }
+    var sessionReps by remember(exercise) { mutableIntStateOf(0) }
     var permissionGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
@@ -63,7 +64,6 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
     LaunchedEffect(movement) {
         movementRef.set(movement)
         reps = 0
-        onRepCount(0)
     }
 
     Column(Modifier.fillMaxSize().background(CoachBg).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -84,7 +84,11 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
             CameraPreview(
                 lifecycleOwner = lifecycleOwner,
                 movement = movementRef,
-                onNewReps = { value -> reps = value; onRepCount(value) },
+                onNewReps = { value ->
+                    reps = value
+                    sessionReps = (sessionReps + 1).coerceAtMost(100_000)
+                    onRepCount(sessionReps)
+                },
                 onError = { cameraError = it },
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
@@ -105,12 +109,16 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
                     Text("estimate from visible pose landmarks", color = Color.Gray, fontSize = 12.sp)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    FilledTonalButton(onClick = { reps++; onRepCount(reps) }) {
+                    FilledTonalButton(onClick = {
+                        reps = (reps + 1).coerceAtMost(100_000)
+                        sessionReps = (sessionReps + 1).coerceAtMost(100_000)
+                        onRepCount(sessionReps)
+                    }) {
                         Icon(Icons.Filled.FitnessCenter, null)
                         Spacer(Modifier.width(5.dp))
                         Text("+1 manual")
                     }
-                    TextButton(onClick = { reps = 0; onRepCount(0) }) { Text("Reset") }
+                    TextButton(onClick = { reps = 0 }) { Text("Clear display") }
                 }
             }
         }
