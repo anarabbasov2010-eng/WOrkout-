@@ -115,6 +115,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
     var movement by remember(exercise) { mutableStateOf(initialMovement) }
     var reps by remember { mutableIntStateOf(0) }
     var sessionReps by remember(exercise) { mutableIntStateOf(0) }
+    var counterResetToken by remember { mutableIntStateOf(0) }
     var lens by remember { mutableStateOf(CameraMode.FRONT) }
     var permissionGranted by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
@@ -213,7 +214,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
                     .border(1.dp, Color(0xFF354331), RoundedCornerShape(25.dp))
             ) {
                 if (permissionGranted) {
-                    key(lens) {
+                    key(lens, counterResetToken) {
                         CameraPreview(
                             lifecycleOwner = lifecycleOwner,
                             movement = movementRef,
@@ -363,7 +364,7 @@ fun CameraCoachScreen(exercise: String, onRepCount: (Int) -> Unit, onBack: () ->
                             Text(stringResource(R.string.camera_manual_rep), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                         OutlinedButton(
-                            onClick = { reps = 0 },
+                            onClick = { reps = 0; counterResetToken++ },
                             shape = RoundedCornerShape(14.dp),
                             contentPadding = PaddingValues(vertical = 12.dp)
                         ) {
@@ -526,22 +527,34 @@ private fun CameraPreview(
 }
 
 private fun extractPoseMetrics(pose: Pose, movement: Movement): PoseMetrics {
-    val trio = when (movement) {
-        Movement.SQUAT, Movement.LUNGE -> Triple(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE)
-        Movement.PUSH_UP -> Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST)
-        Movement.BICEP_CURL -> Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST)
+    val landmarkTriples = when (movement) {
+        Movement.SQUAT, Movement.LUNGE -> listOf(
+            Triple(PoseLandmark.LEFT_HIP, PoseLandmark.LEFT_KNEE, PoseLandmark.LEFT_ANKLE),
+            Triple(PoseLandmark.RIGHT_HIP, PoseLandmark.RIGHT_KNEE, PoseLandmark.RIGHT_ANKLE)
+        )
+        Movement.PUSH_UP, Movement.BICEP_CURL -> listOf(
+            Triple(PoseLandmark.LEFT_SHOULDER, PoseLandmark.LEFT_ELBOW, PoseLandmark.LEFT_WRIST),
+            Triple(PoseLandmark.RIGHT_SHOULDER, PoseLandmark.RIGHT_ELBOW, PoseLandmark.RIGHT_WRIST)
+        )
     }
-    val landmarks = listOf(trio.first, trio.second, trio.third).map { pose.getPoseLandmark(it) }
-    if (landmarks.any { it == null }) return PoseMetrics(null, 0f, CameraCue.LANDMARKS_NOT_VISIBLE)
-    val first = landmarks[0]!!
-    val middle = landmarks[1]!!
-    val last = landmarks[2]!!
-    val confidence = minOf(first.inFrameLikelihood, middle.inFrameLikelihood, last.inFrameLikelihood)
-    val angle = PoseRepCounter.angle(
-        first.position.x, first.position.y,
-        middle.position.x, middle.position.y,
-        last.position.x, last.position.y
-    )
+    val candidates = landmarkTriples.mapNotNull { trio ->
+        val points = listOf(trio.first, trio.second, trio.third).map { pose.getPoseLandmark(it) }
+        if (points.any { it == null }) return@mapNotNull null
+        val first = points[0]!!
+        val middle = points[1]!!
+        val last = points[2]!!
+        val confidence = minOf(first.inFrameLikelihood, middle.inFrameLikelihood, last.inFrameLikelihood)
+        val angle = PoseRepCounter.angle(
+            first.position.x, first.position.y,
+            middle.position.x, middle.position.y,
+            last.position.x, last.position.y
+        )
+        angle to confidence
+    }
+    val best = candidates.maxByOrNull { it.second }
+        ?: return PoseMetrics(null, 0f, CameraCue.LANDMARKS_NOT_VISIBLE)
+    val angle = best.first
+    val confidence = best.second
     val cue = when {
         confidence < PoseRepCounter.MIN_CONFIDENCE -> CameraCue.LOW_CONFIDENCE
         !angle.isFinite() -> CameraCue.ANGLE_UNAVAILABLE
