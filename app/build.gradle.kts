@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("io.github.sceneview:sceneview:2.3.0")
     implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
@@ -86,3 +87,63 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 }
+
+
+// Bundle a pinned, openly licensed anatomical GLB as an app asset.
+// Build-time integrity checks prevent a partial or altered model from entering the APK.
+val anatomyAssetDirectory = layout.buildDirectory.dir("generated/anatomy-assets")
+val anatomyModelFile = anatomyAssetDirectory.map { it.file("models/ecorche.glb") }
+val anatomyModelUrl = "https://raw.githubusercontent.com/Charleeh/ecorche/320805e06aee51e2e6f6b22533eb2a59d43f2d4d/model/ecorche.glb"
+val anatomyModelExpectedSize = 14_314_536L
+val anatomyModelGitBlobSha1 = "4360e0abeed7892e2585f257857b6d2d040af85d"
+
+fun calculateAnatomyGitBlobSha1(file: java.io.File): String {
+    val digest = java.security.MessageDigest.getInstance("SHA-1")
+    digest.update(("blob " + file.length() + "\u0000").toByteArray(Charsets.UTF_8))
+    file.inputStream().buffered().use { input ->
+        val buffer = ByteArray(16 * 1024)
+        while (true) {
+            val count = input.read(buffer)
+            if (count < 0) break
+            digest.update(buffer, 0, count)
+        }
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+val downloadAnatomyModel by tasks.registering {
+    inputs.property("sourceCommit", "320805e06aee51e2e6f6b22533eb2a59d43f2d4d")
+    inputs.property("expectedGitBlobSha1", anatomyModelGitBlobSha1)
+    outputs.file(anatomyModelFile)
+    outputs.upToDateWhen {
+        val file = anatomyModelFile.get().asFile
+        file.isFile && file.length() == anatomyModelExpectedSize &&
+            runCatching { calculateAnatomyGitBlobSha1(file) == anatomyModelGitBlobSha1 }.getOrDefault(false)
+    }
+    doLast {
+        val destination = anatomyModelFile.get().asFile
+        destination.parentFile.mkdirs()
+        val connection = java.net.URL(anatomyModelUrl).openConnection().apply {
+            connectTimeout = 20_000
+            readTimeout = 120_000
+            useCaches = false
+        }
+        connection.getInputStream().buffered().use { input ->
+            destination.outputStream().buffered().use { output -> input.copyTo(output) }
+        }
+        check(destination.length() == anatomyModelExpectedSize) {
+            "Anatomy model download size mismatch; refusing to package an incomplete asset."
+        }
+        check(calculateAnatomyGitBlobSha1(destination) == anatomyModelGitBlobSha1) {
+            "Anatomy model integrity check failed; refusing to package an unverified asset."
+        }
+    }
+}
+
+android.sourceSets.getByName("main").assets.srcDir(anatomyAssetDirectory)
+tasks.configureEach {
+    if (name.startsWith("merge") && name.endsWith("Assets")) {
+        dependsOn(downloadAnatomyModel)
+    }
+}
+tasks.named("preBuild").configure { dependsOn(downloadAnatomyModel) }
