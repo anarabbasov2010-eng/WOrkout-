@@ -34,7 +34,7 @@ fun BackupScreen(onBack: () -> Unit, onImported: (ByteArray) -> Unit) {
                 status = try {
                     withContext(Dispatchers.IO) {
                         val payload = EncryptedLocalStore(context).read()
-                            ?: """{"formatVersion":1,"completedWorkouts":0,"waterMl":750,"reps":0}""".toByteArray()
+                            ?: """{"formatVersion":1,"completedWorkouts":0,"waterMl":750,"totalReps":0}""".toByteArray()
                         EncryptedBackup.writeToUri(context, uri, payload, secret)
                     }
                     "Encrypted backup exported. Keep the password safe; it cannot be recovered."
