@@ -53,6 +53,11 @@ fun BackupScreen(onBack: () -> Unit, onImported: (ByteArray) -> Unit) {
                 status = try {
                     val plain = withContext(Dispatchers.IO) { EncryptedBackup.readFromUri(context, uri, secret) }
                     require(plain.size in 2..20_000_000) { "Backup is too large or empty." }
+                    val json = org.json.JSONObject(String(plain, Charsets.UTF_8))
+                    require(json.optInt("formatVersion", 0) == 1) { "Unsupported backup data version." }
+                    require(json.optInt("completedWorkouts", 0) in 0..1_000_000) { "Invalid workout count." }
+                    require(json.optInt("waterMl", 750) in 0..20_000) { "Invalid water total." }
+                    require(json.optInt("totalReps", 0) in 0..100_000) { "Invalid repetition total." }
                     withContext(Dispatchers.Main) { onImported(plain) }
                     "Backup authenticated and restored."
                 } catch (error: Exception) {

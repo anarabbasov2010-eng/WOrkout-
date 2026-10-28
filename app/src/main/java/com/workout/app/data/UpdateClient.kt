@@ -22,41 +22,43 @@ object UpdateClient {
     private const val MAX_APK_BYTES = 250L * 1024L * 1024L
 
     suspend fun findLatest(channel: UpdateChannel, installedVersionCode: Long): UpdateManifest? = withContext(Dispatchers.IO) {
-        val release = when (channel) {
-            UpdateChannel.STABLE -> getJsonObject("$API/releases/latest")
+        val candidates: List<JSONObject> = when (channel) {
+            UpdateChannel.STABLE -> listOf(getJsonObject("$API/releases/latest"))
             UpdateChannel.BETA -> {
                 val releases = JSONArray(getText("$API/releases?per_page=30"))
                 (0 until releases.length())
                     .map { releases.getJSONObject(it) }
-                    .firstOrNull { it.optBoolean("prerelease", false) && it.optString("tag_name").startsWith("beta-v") }
-                    ?: return@withContext null
+                    .filter { it.optBoolean("prerelease", false) && it.optString("tag_name").startsWith("beta-v") }
             }
         }
-        val assets = release.optJSONArray("assets") ?: return@withContext null
-        val manifestAsset = (0 until assets.length())
-            .map { assets.getJSONObject(it) }
-            .firstOrNull { it.optString("name") == "update-manifest.json" }
-            ?: return@withContext null
-        val manifestUrl = manifestAsset.optString("browser_download_url")
-        require(manifestUrl.startsWith("https://github.com/")) { "Untrusted update manifest URL." }
-        val json = JSONObject(getText(manifestUrl, MAX_MANIFEST_BYTES))
-        val remoteChannel = when (json.optString("channel").lowercase()) {
-            "stable" -> UpdateChannel.STABLE
-            "beta" -> UpdateChannel.BETA
-            else -> error("Unsupported update channel in manifest.")
+
+        for (release in candidates) {
+            val assets = release.optJSONArray("assets") ?: continue
+            val manifestAsset = (0 until assets.length())
+                .map { assets.getJSONObject(it) }
+                .firstOrNull { it.optString("name") == "update-manifest.json" } ?: continue
+            val manifestUrl = manifestAsset.optString("browser_download_url")
+            require(manifestUrl.startsWith("https://github.com/")) { "Untrusted update manifest URL." }
+            val json = JSONObject(getText(manifestUrl, MAX_MANIFEST_BYTES))
+            val remoteChannel = when (json.optString("channel").lowercase()) {
+                "stable" -> UpdateChannel.STABLE
+                "beta" -> UpdateChannel.BETA
+                else -> error("Unsupported update channel in manifest.")
+            }
+            require(remoteChannel == channel) { "The release channel does not match the selected channel." }
+            val manifest = UpdateManifest(
+                channel = remoteChannel,
+                versionCode = json.getLong("versionCode"),
+                versionName = json.getString("versionName"),
+                sha256 = json.getString("sha256"),
+                signerCertificateSha256 = json.getString("signerCertificateSha256"),
+                apkUrl = json.getString("apkUrl")
+            )
+            require(manifest.apkUrl.startsWith("https://github.com/")) { "Untrusted APK URL." }
+            if (manifest.versionCode <= installedVersionCode) continue
+            return@withContext manifest
         }
-        require(remoteChannel == channel) { "The release channel does not match the selected channel." }
-        val manifest = UpdateManifest(
-            channel = remoteChannel,
-            versionCode = json.getLong("versionCode"),
-            versionName = json.getString("versionName"),
-            sha256 = json.getString("sha256"),
-            signerCertificateSha256 = json.getString("signerCertificateSha256"),
-            apkUrl = json.getString("apkUrl")
-        )
-        require(manifest.versionCode > installedVersionCode) { "No newer update is available." }
-        require(manifest.apkUrl.startsWith("https://github.com/")) { "Untrusted APK URL." }
-        manifest
+        null
     }
 
     suspend fun downloadAndVerify(

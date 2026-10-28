@@ -5,44 +5,63 @@ import java.io.DataOutputStream
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.security.MessageDigest
 import java.security.SecureRandom
 
 /**
- * Small direct-LAN transfer for already encrypted backup blobs. Keep both devices on
- * a trusted network, share the short-lived pairing code privately, and never send raw
- * fitness data to this socket. This is a transport primitive, not cloud synchronization.
+ * Direct-LAN transport for password-encrypted WOBK backups only.
+ * The caller authenticates/decrypts the archive before accepting it.
  */
 object LocalTransfer {
     private val random = SecureRandom()
-    private const val MAX_TRANSFER_BYTES = 20_000_000
+    const val MAX_TRANSFER_BYTES = 20_000_000
 
     fun newPairingCode(): String = (100_000 + random.nextInt(900_000)).toString()
 
-    fun receive(port: Int, pairingCode: String, onPayload: (ByteArray) -> Unit) {
+    fun receive(
+        port: Int,
+        pairingCode: String,
+        shouldStop: () -> Boolean = { false },
+        onPayload: (ByteArray) -> Unit
+    ) {
         require(pairingCode.matches(Regex("\\d{6}"))) { "Pairing code must have six digits." }
         require(port in 1024..65535) { "Invalid receiving port." }
+
         ServerSocket(port).use { server ->
             server.reuseAddress = true
-            server.soTimeout = 120_000
-            server.accept().use { socket ->
-                socket.soTimeout = 30_000
-                val input = DataInputStream(socket.getInputStream())
-                val output = DataOutputStream(socket.getOutputStream())
-                require(MessageDigest.isEqual(input.readUTF().toByteArray(Charsets.UTF_8), pairingCode.toByteArray(Charsets.UTF_8))) {
-                    "Pairing code did not match."
+            // Poll periodically so the screen can cancel a waiting receiver.
+            server.soTimeout = 1_000
+            while (!shouldStop()) {
+                val socket = try {
+                    server.accept()
+                } catch (_: SocketTimeoutException) {
+                    continue
                 }
-                val size = input.readInt()
-                require(size in 1..MAX_TRANSFER_BYTES) { "Invalid archive size." }
-                val expectedDigest = ByteArray(32).also(input::readFully)
-                val payload = ByteArray(size).also(input::readFully)
-                val actualDigest = MessageDigest.getInstance("SHA-256").digest(payload)
-                require(MessageDigest.isEqual(expectedDigest, actualDigest)) { "Transfer integrity check failed." }
-                onPayload(payload)
-                output.writeUTF("OK")
-                output.flush()
+                socket.use { accepted ->
+                    accepted.soTimeout = 30_000
+                    val input = DataInputStream(accepted.getInputStream())
+                    val output = DataOutputStream(accepted.getOutputStream())
+                    val suppliedCode = input.readUTF().toByteArray(Charsets.UTF_8)
+                    require(MessageDigest.isEqual(suppliedCode, pairingCode.toByteArray(Charsets.UTF_8))) {
+                        "Pairing code did not match."
+                    }
+                    val size = input.readInt()
+                    require(size in 1..MAX_TRANSFER_BYTES) { "Invalid archive size." }
+                    val expectedDigest = ByteArray(32).also(input::readFully)
+                    val payload = ByteArray(size).also(input::readFully)
+                    val actualDigest = MessageDigest.getInstance("SHA-256").digest(payload)
+                    require(MessageDigest.isEqual(expectedDigest, actualDigest)) { "Transfer integrity check failed." }
+
+                    // The callback must authenticate and validate the archive before ACK.
+                    onPayload(payload)
+                    output.writeUTF("OK")
+                    output.flush()
+                    return
+                }
             }
         }
+        throw InterruptedException("Transfer receiver stopped.")
     }
 
     fun send(host: String, port: Int, pairingCode: String, encryptedBackup: ByteArray) {
